@@ -41,7 +41,7 @@ const Header = () => {
             {auth.isLoaded &&
               (auth.user ? (
                 <>
-                  <Button color="inherit" component={Link} to="#">
+                  <Button color="inherit" component={Link} to="/profile">
                     {auth.user.name}
                   </Button>
                   <Button color="inherit" onClick={onLogOut}>

@@ -5,7 +5,9 @@ import {
 } from "react-router-dom";
 import Goods from "../../pages/Goods";
 import Login from "../../pages/Login";
+import Profile from "../../pages/Profile";
 import useAuth from "../../hooks/useAuth";
+import PrivateRoute from "../components/PrivateRoute";
 import GuestRoute from "../components/GuestRoute";
 import {
   CircularProgress,
@@ -26,6 +28,14 @@ function AppRoutes() {
           <GuestRoute>
             <Login />
           </GuestRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <PrivateRoute>
+            <Profile />
+          </PrivateRoute>
         }
       />
     </Routes>
