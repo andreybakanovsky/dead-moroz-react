@@ -51,69 +51,77 @@ function Login() {
 
   return (
     <Container maxWidth="xs" >
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Typography
-            variant="h6"
-            sx={{
-              mb: '1rem'
-            }}
-          >Log in</Typography>
-        </Grid>
-      </Grid>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <Grid
+        container
+        spacing={0}
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        style={{ minHeight: '50vh' }}
+      >
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <Controller
-              name="email"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  error={Boolean(errors.email?.message)}
-                  fullWidth={true}
-                  type="email"
-                  label="Email"
-                  variant="outlined"
-                  helperText={errors.email?.message}
-
-                />
-              )}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <Controller
-              name="password"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  error={Boolean(errors.password?.message)}
-                  type="password"
-                  fullWidth={true}
-                  label="Password"
-                  variant="outlined"
-                  helperText={errors.password?.message}
-                />
-              )}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Button
-              variant="contained"
-              color="primary"
-              type="submit"
-              disabled={isLoading}
-            >
-              Log in
-            </Button>
+            <Typography
+              variant="h6"
+              sx={{
+                mb: '1rem'
+              }}
+            >Log in</Typography>
           </Grid>
         </Grid>
-      </form>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <Controller
+                name="email"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    error={Boolean(errors.email?.message)}
+                    fullWidth={true}
+                    type="email"
+                    label="Email"
+                    variant="outlined"
+                    helperText={errors.email?.message}
 
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Controller
+                name="password"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    error={Boolean(errors.password?.message)}
+                    type="password"
+                    fullWidth={true}
+                    label="Password"
+                    variant="outlined"
+                    helperText={errors.password?.message}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                color="primary"
+                type="submit"
+                disabled={isLoading}
+              >
+                Log in
+              </Button>
+            </Grid>
+          </Grid>
+        </form>
+      </Grid>
     </Container>
   );
 }
