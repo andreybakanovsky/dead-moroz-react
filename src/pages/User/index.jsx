@@ -2,22 +2,21 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {
   Container,
 } from "@mui/material";
-
 import api from "../../services/api";
-import { 
+import {
   useParams,
-  useNavigate } from 'react-router-dom';
+  useNavigate
+} from 'react-router-dom';
 
-function Goods() {
+function User() {
+  const [data, setData] = useState();
   let id = useParams();
   const navigate = useNavigate();
-  const [data, setData] = useState();
 
   const loadData = useCallback(async () => {
     try {
-      const response = await api.auth.getGoods(id);
+      const response = await api.auth.getUser(id);
       setData(response.data);
-      console.log(response.data);
     } catch (e) {
       console.log(e.response.status);
       console.log(e.response.data);
@@ -33,11 +32,13 @@ function Goods() {
 
   return (
     <Container >
-      {data && data.map(good => {
-        return <p key={good.id}>{good.id} | {good.year} | {good.content}</p>;
-      })}
+      {data &&
+        <div>
+          <h2> {data.name} </h2>
+          <h3> Age: {data.age} </h3>
+        </div>}
     </Container>
   );
 }
 
-export default Goods;
+export default User;
