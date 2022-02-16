@@ -16,6 +16,7 @@ import GuestRoute from "../components/GuestRoute";
 
 import Home from "../../pages/Home";
 import Login from "../../pages/Login";
+import Signup from "../../pages/Signup";
 import Profile from "../../pages/Profile";
 import NotFound from "../../pages/NotFound";
 
@@ -40,6 +41,10 @@ function AppRoutes() {
       <Route
         path="/login"
         element={<GuestRoute> <Login /> </GuestRoute>}
+      />
+      <Route
+        path="/signup"
+        element={<GuestRoute> <Signup /> </GuestRoute>}
       />
       <Route
         path="/profile"
