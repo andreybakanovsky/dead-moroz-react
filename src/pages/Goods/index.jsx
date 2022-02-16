@@ -1,12 +1,22 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   Container,
+  Card,
+  CardActionArea,
+  CardMedia,
+  CardContent,
+  Typography,
+  Grid
 } from "@mui/material";
 
+import { makeStyles } from '@mui/styles';
+
 import api from "../../services/api";
-import { 
+import {
   useParams,
-  useNavigate } from 'react-router-dom';
+  useNavigate,
+  Link,
+} from 'react-router-dom';
 
 function Goods() {
   let id = useParams();
@@ -17,7 +27,6 @@ function Goods() {
     try {
       const response = await api.auth.getGoods(id);
       setData(response.data);
-      console.log(response.data);
     } catch (e) {
       console.log(e.response.status);
       console.log(e.response.data);
@@ -33,9 +42,44 @@ function Goods() {
 
   return (
     <Container >
-      {data && data.map(good => {
-        return <p key={good.id}>{good.id} | {good.year} | {good.content}</p>;
-      })}
+      <Grid
+        container
+        direction="row"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <h2>MY GOODS</h2>
+      </Grid>
+      <Grid
+        container
+        direction="row"
+        justifyContent="flex-start"
+        alignItems="flex-start"
+        item xs="auto"
+      >
+        {data && data.map(good => {
+          return <Grid item xs={12} sm={6} md={4} key={good.id}>
+            <Card sx={{ borderRadius: 3, m: 3, maxWidth: 345 }} >
+              <CardActionArea component={Link} to={`/users/${id.user_id}/goods/${good.id}`}>
+                <CardMedia
+                  component="img"
+                  height="140"
+                // image=".jpg"
+                // alt="..."
+                />
+                <CardContent>
+                  <Typography gutterBottom variant="h5" component="div">
+                    {good.year}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {good.content}
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          </Grid>
+        })}
+      </Grid>
     </Container>
   );
 }

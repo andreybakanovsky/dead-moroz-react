@@ -14,6 +14,9 @@ const endpoints = {
 
   getGoods: (id) => axios.get(`/v1/users/${id.user_id}/goods`),
   getGood: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}`),
+  updateGood: (id, data) => axios.patch(`/v1/users/${id.user_id}/goods/${id.good_id}`, data),
+  deleteGood: (id) => axios.delete(`/v1/users/${id.user_id}/goods/${id.good_id}`),
+
   getRequestedGifts: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/gifts`),
   getRequestedGift: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/gifts/${id.id}`),
 
