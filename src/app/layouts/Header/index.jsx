@@ -50,6 +50,9 @@ const Header = () => {
                 </>
               ) : (
                 <>
+                  <Button color="inherit" component={Link} to="/signup">
+                    Sign up
+                  </Button>
                   <Button color="inherit" component={Link} to="/login">
                     Log in
                   </Button>
