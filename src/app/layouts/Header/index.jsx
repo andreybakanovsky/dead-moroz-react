@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import {
   AppBar,
   IconButton,
@@ -6,11 +6,15 @@ import {
   Typography,
   CssBaseline,
   Container,
-  Button
+  Button,
+  TextField
 } from "@mui/material";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from "../../../hooks/useAuth";
+import AddGood from "../../../pages/AddGood";
+import { Add } from '@mui/icons-material';
 
 const Header = () => {
 
@@ -21,6 +25,10 @@ const Header = () => {
     auth.logOut();
     navigate("/");
   };
+
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = (state) => setOpen(state);
 
   return (
     <React.Fragment>
@@ -41,6 +49,12 @@ const Header = () => {
             {auth.isLoaded &&
               (auth.user ? (
                 <>
+                  <IconButton
+                    edge="start"
+                    color='inherit'
+                    onClick={handleOpen}>
+                    <AddCircleIcon />
+                  </IconButton>
                   <Button color="inherit" component={Link} to="/profile">
                     {auth.user.name}
                   </Button>
@@ -61,6 +75,7 @@ const Header = () => {
           </Toolbar>
         </Container>
       </AppBar>
+      <AddGood setStateModal={handleClose} stateOpen={open} />
     </React.Fragment>
   )
 }
