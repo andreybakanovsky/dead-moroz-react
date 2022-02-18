@@ -9,8 +9,6 @@ import {
   Grid
 } from "@mui/material";
 
-import { makeStyles } from '@mui/styles';
-
 import api from "../../services/api";
 import {
   useParams,
