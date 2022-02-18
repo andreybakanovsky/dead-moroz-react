@@ -46,7 +46,7 @@ function Goods() {
         justifyContent="center"
         alignItems="center"
       >
-        <h2>MY GOODS</h2>
+        <h2>MY GOOD</h2>
       </Grid>
       <Grid
         container
