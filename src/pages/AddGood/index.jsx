@@ -30,8 +30,6 @@ const style = {
 
 const AddGood = (props) => {
   const id = useParams();
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [isOpen, setIsOpen] = useState(false);
   const handleClose = () => props.setStateModal(false)
   const {
     control,
@@ -49,12 +47,17 @@ const AddGood = (props) => {
   };
 
   const onSubmit = async (data) => {
+    if (data.content == '') {
+      setError("content", {
+        type: "manual",
+        message: "good is empty",
+      });
+      return;
+    }
     try {
-      // setIsLoading(true);
       console.log("id", id);
       console.log("data", data);
       await api.auth.addGood(id, { "good": data });
-      // setIsOpen(true);
     } catch (e) {
       if (e.response.status === 422) {
         Object.keys(e.response.data).forEach((key) => {
@@ -65,7 +68,6 @@ const AddGood = (props) => {
         });
       }
     } finally {
-      // setIsLoading(false);
       handleClose();
       onGoods();
     }
@@ -78,7 +80,6 @@ const AddGood = (props) => {
   return (
     <Modal
       open={props.stateOpen}
-      onClose={handleClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
