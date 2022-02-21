@@ -14,6 +14,7 @@ const endpoints = {
   // getInvitation: () => axios.get(`/v1/users/${id.user_id}/invitation/${id.id}`),
 
   getGoods: (id) => axios.get(`/v1/users/${id.user_id}/goods`),
+  addGood: (id, data) => axios.post(`/v1/users/${id.user_id}/goods`, data),
   getGood: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}`),
   updateGood: (id, data) => axios.patch(`/v1/users/${id.user_id}/goods/${id.good_id}`, data),
   deleteGood: (id) => axios.delete(`/v1/users/${id.user_id}/goods/${id.good_id}`),
