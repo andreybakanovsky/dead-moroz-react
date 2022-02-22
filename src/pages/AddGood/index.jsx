@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import {
@@ -47,7 +47,7 @@ const AddGood = (props) => {
   };
 
   const onSubmit = async (data) => {
-    if (data.content == '') {
+    if (data.content === '') {
       setError("content", {
         type: "manual",
         message: "good is empty",

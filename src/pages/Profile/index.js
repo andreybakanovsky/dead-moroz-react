@@ -29,7 +29,7 @@ function Profile() {
   const [open, setOpen] = useState(false);
   const [avatars, setAvatars] = useState([]);
 
-  const getAvaId = () => Math.round(Math.random() * 1000);
+  const getAvaId = () => Math.round(Math.random() * 1000000);
 
   function generateAvatars() {
     let i = 0;
@@ -47,7 +47,7 @@ function Profile() {
   }
 
   const handleClose = (url) => {
-    if (url != undefined) {
+    if (url !== undefined) {
       auth.setUser((prevState) => ({
         ...prevState,
         avatar: url
@@ -280,6 +280,7 @@ function Profile() {
                   src={`${item.avaUrl}?w=32&h=32&fit=crop&auto=format`}
                   srcSet={`${item.avaUrl}?w=32&h=32&fit=crop&auto=format&dpr=2 2x`}
                   loading="lazy"
+                  alt='ava'
                 />
               </ImageListItem>
             ))}

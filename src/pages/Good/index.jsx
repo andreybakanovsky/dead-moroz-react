@@ -15,7 +15,7 @@ import {
 } from 'react-router-dom';
 import { useForm, Controller } from "react-hook-form";
 import ImageList from '@mui/material/ImageList';
-import ImageListItem from '@mui/material/ImageListItem';
+// import ImageListItem from '@mui/material/ImageListItem';
 
 function Good() {
   const id = useParams();
@@ -78,7 +78,7 @@ function Good() {
       year: data.year,
       content: data.content
     });
-  }, [reset]);
+  }, [id, reset]);
 
   useEffect(() => {
     loadData();
