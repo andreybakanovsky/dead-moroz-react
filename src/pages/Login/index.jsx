@@ -36,12 +36,15 @@ function Login() {
       auth.setToken(response.api_token);
       auth.setUser(response);
     } catch (e) {
-      if (e.response.status === 422) {
-        Object.keys(e.response.data.errors).forEach((key) => {
-          setError(key, {
-            type: "manual",
-            message: e.response.data.errors[key],
-          });
+      if (e.response.status === 401) {
+        console.log(e.response.data);
+        // setError("email", {
+        //   type: "manual",
+        //   message: e.response.data.error,
+        // });
+        setError("password", {
+          type: "manual",
+          message: e.response.data.error,
         });
       }
     } finally {

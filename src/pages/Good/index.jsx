@@ -56,7 +56,7 @@ function Good() {
   };
 
   const onDelete = async () => {
-    var result = window.confirm(`Do you really want to delete ${year}'s goods ?`);
+    var result = window.confirm(`Do you really want to delete ${year}'s good ?`);
     try {
       if (result) {
         const data = await api.auth.deleteGood(id);
@@ -93,7 +93,7 @@ function Good() {
           justifyContent="center"
           alignItems="center"
         >
-          <h2>MY {year}'s GOODS</h2>
+          <h2>MY {year}'s GOOD</h2>
         </Grid>
         <Grid item xs={4}>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -127,7 +127,7 @@ function Good() {
                       rows={5}
                       error={Boolean(errors.content?.message)}
                       fullWidth={true}
-                      label="My Goods"
+                      label="My Good"
                       variant="outlined"
                       helperText={errors.content?.message}
                     />
