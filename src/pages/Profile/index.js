@@ -7,17 +7,64 @@ import {
   Button,
   Typography,
   Snackbar,
+  Avatar,
+  IconButton,
 } from "@mui/material";
 import { yupResolver } from "@hookform/resolvers/yup";
 import validationSchema from "./validation";
 import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
 import { useCallback, useEffect, useState } from "react";
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
+import ImageList from '@mui/material/ImageList';
+import ImageListItem from '@mui/material/ImageListItem';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import CloseIcon from '@mui/icons-material/Close';
 
 function Profile() {
   const auth = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [avatars, setAvatars] = useState([]);
+
+  function generateAvatars() {
+    let i = 0;
+    setAvatars([]);
+    while (i < 12) {
+      const avaId = Math.round(Math.random() * 1000);
+      setAvatars(avatars => [...avatars, { avaUrl: `https://avatars.dicebear.com/api/adventurer/${avaId}.svg` }]);
+      i++;
+    }
+  }
+
+  function handleOpen() {
+    generateAvatars();
+    setOpen(true);
+  }
+
+  const handleClose = (url) => {
+    if (url != undefined) {
+      auth.setUser((prevState) => ({
+        ...prevState,
+        avatar: url
+      }))
+    };
+    setAvatars([]);
+    setOpen(false);
+  };
+
+  function showAvatars() {
+    handleOpen();
+  }
+
+  function delAvatar() {
+    auth.setUser((prevState) => ({
+      ...prevState,
+      avatar: ''
+    }))
+  }
 
   const {
     control,
@@ -29,9 +76,26 @@ function Profile() {
     resolver: yupResolver(validationSchema),
   });
 
+  const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 500,
+    height: 550,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 2,
+  };
+
   const onSubmit = async (data) => {
     try {
       setIsLoading(true);
+      data = {
+        ...data,
+        "avatar": auth.user.avatar
+      }
       await api.auth.updateProfile({ "user": data });
       setIsOpen(true);
     } catch (e) {
@@ -70,7 +134,7 @@ function Profile() {
         direction="column"
         alignItems="center"
         justifyContent="center"
-        style={{ minHeight: '50vh' }}
+        style={{ minHeight: '60vh' }}
       >
         <Grid container spacing={3}>
           <Grid item xs={12}>
@@ -80,12 +144,49 @@ function Profile() {
                 mb: '0.8rem'
               }}
             >
-              Update profile
+              My profile
             </Typography>
           </Grid>
         </Grid>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3}>
+            <Grid item xs={8}>
+              <Avatar
+                alt="Remy Sharp"
+                src={auth.user.avatar}
+                sx={{ width: 200, height: 200 }}
+                label="avatar"
+              />
+
+            </Grid>
+            <Grid
+              item
+              xs={4}
+              container
+              direction="column"
+              justifyContent="flex-end"
+              alignItems="flex-end"
+            >
+              <Button
+                sx={{
+                  textTransform: 'none',
+                  mb: '0.8rem'
+                }}
+                fullWidth={true}
+                variant="outlined"
+                onClick={showAvatars}
+              >
+                Add an ava
+              </Button>
+              <Button
+                style={{ textTransform: 'none' }}
+                variant="outlined"
+                fullWidth={true}
+                onClick={delAvatar}
+              >
+                Del the ava
+              </Button>
+            </Grid>
             <Grid item xs={12}>
               <Controller
                 name="name"
@@ -103,7 +204,6 @@ function Profile() {
                 )}
               />
             </Grid>
-
             <Grid item xs={12}>
               <Controller
                 name="age"
@@ -141,7 +241,50 @@ function Profile() {
           message="Profile updated successfully"
         />
       </Grid>
-    </Container>
+      <Modal
+        open={open}
+        onClose={() => handleClose()}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Box
+            sx={{ height: 30 }}
+          >
+            <IconButton
+              edge="start"
+              color='warning'
+              style={{ float: 'left' }}
+              onClick={() => handleClose()}
+            >
+              <CloseIcon />
+            </IconButton>
+            <IconButton
+              edge="start"
+              color='primary'
+              style={{ float: 'right' }}
+              onClick={generateAvatars}
+            >
+              <RefreshIcon />
+            </IconButton>
+          </Box>
+          <ImageList sx={{ width: 480, height: 480 }} cols={4} rowHeight={100}>
+            {avatars.map((item) => (
+              <ImageListItem
+                key={item.avaUrl}
+                onClick={() => handleClose(item.avaUrl)}
+              >
+                <img
+                  src={`${item.avaUrl}?w=32&h=32&fit=crop&auto=format`}
+                  srcSet={`${item.avaUrl}?w=32&h=32&fit=crop&auto=format&dpr=2 2x`}
+                  loading="lazy"
+                />
+              </ImageListItem>
+            ))}
+          </ImageList>
+        </Box>
+      </Modal>
+    </Container >
   );
 }
 
