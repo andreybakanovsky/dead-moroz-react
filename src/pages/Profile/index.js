@@ -29,14 +29,16 @@ function Profile() {
   const [open, setOpen] = useState(false);
   const [avatars, setAvatars] = useState([]);
 
+  const getAvaId = () => Math.round(Math.random() * 1000);
+
   function generateAvatars() {
     let i = 0;
-    setAvatars([]);
+    const avatars = [];
     while (i < 12) {
-      const avaId = Math.round(Math.random() * 1000);
-      setAvatars(avatars => [...avatars, { avaUrl: `https://avatars.dicebear.com/api/adventurer/${avaId}.svg` }]);
+      avatars.push({ avaUrl: `https://avatars.dicebear.com/api/adventurer/${getAvaId()}.svg` });
       i++;
     }
+    setAvatars(avatars);
   }
 
   function handleOpen() {
