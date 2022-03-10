@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   TextField,
   Grid,
@@ -15,7 +15,7 @@ import {
 } from 'react-router-dom';
 import { useForm, Controller } from "react-hook-form";
 import ImageList from '@mui/material/ImageList';
-// import ImageListItem from '@mui/material/ImageListItem';
+import ImageListItem from '@mui/material/ImageListItem';
 
 function Good() {
   const id = useParams();
@@ -24,6 +24,9 @@ function Good() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [messageSnackbar, setMessageSnackbar] = useState();
+  const inputFile = useRef(null);
+  const [filesSuggested, setFilesSuggested] = useState();
+  const [filesCurrent, setFilesCurrent] = useState();
 
   const {
     control,
@@ -36,10 +39,19 @@ function Good() {
   });
 
   const onSubmit = async (data) => {
+    const formData = new FormData();
+    console.log("data", data);
     try {
       setIsLoading(true);
+
+      formData.append('good[year]', data.year);
+      formData.append('good[content]', data.content);
+      for (let i = 0; i < filesSuggested.length; i++) {
+        formData.append("good[images][]", filesSuggested[i], filesSuggested[i].name)
+      }
+
       setMessageSnackbar("The Good update successfully")
-      await api.auth.updateGood(id, { "good": data });
+      await api.auth.updateGood(id, formData);
       setIsOpen(true);
     } catch (e) {
       if (e.response.status === 422) {
@@ -74,6 +86,7 @@ function Good() {
   const loadData = useCallback(async () => {
     const { data } = await api.auth.getGood(id);
     setYear(data.year)
+    setFilesCurrent(data.images);
     reset({
       year: data.year,
       content: data.content
@@ -84,9 +97,25 @@ function Good() {
     loadData();
   }, [loadData]);
 
+  const openFileDialog = () => {
+    inputFile.current.click();
+  };
+
+  const changeHandler = (e) => {
+    const chosenfiles = [];
+    const files = e.target.files;
+    if (files.length > 0) setFilesCurrent(undefined);
+    for (let i = 0; i < files.length; i++) {
+      chosenfiles.push(files[i]);
+    }
+    setFilesSuggested(chosenfiles);
+    chosenfiles.map((file) => {
+    })
+  }
+
   return (
     <Container >
-      <Grid container spacing={1}>
+      <Grid container spacing={2}>
         <Grid
           container
           direction="row"
@@ -134,7 +163,7 @@ function Good() {
                   )}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs='auto'>
                 <Button
                   sx={{ mr: '1rem' }}
                   variant="contained"
@@ -152,28 +181,57 @@ function Good() {
                 >
                   Delete
                 </Button>
+                <input
+                  style={{ display: 'none' }}
+                  type="file"
+                  multiple ref={inputFile}
+                  name='image-uploader-1234556'
+                  id="image-uploader-1234556"
+                  onInput={(e) => changeHandler(e)}
+                  accept="image/*"
+                  value=''
+                />
+                <Button
+                  sx={{ mr: '1rem' }}
+                  variant="contained"
+                  color="primary"
+                  onClick={openFileDialog}
+                >
+                  upload photo
+                </Button>
               </Grid>
             </Grid>
           </form>
         </Grid>
         <Grid item xs={8}>
-          <ImageList
-            sx={{ width: 300, height: 220 }}
-            variant="quilted"
-            cols={4}
-            rowHeight={121}
-          >
+          <ImageList sx={{ width: "auto", height: "auto" }} rowHeight="auto" variant="masonry">
+
+            {filesCurrent && filesCurrent.map((file, i) => {
+              return (
+                <ImageListItem key={i}>
+                  <img
+                    src={file.url}
+                    srcSet={file.url}
+                    alt={"photo... "}
+                    loading="lazy"
+                  />
+                </ImageListItem>)
+            })}
+
+            {filesSuggested && filesSuggested.map((file, i) => {
+              console.log("here", file);
+              return (
+                <ImageListItem key={-i}>
+                  <img
+                    src={URL.createObjectURL(file)}
+                    srcSet={URL.createObjectURL(file)}
+                    alt={"photo... "}
+                    loading="lazy"
+                  />
+                </ImageListItem>)
+            })}
 
           </ImageList>
-          <Button
-            sx={{ mr: '1rem' }}
-            variant="contained"
-            color="primary"
-            // onClick={}
-            disabled={true}
-          >
-            upload photo
-          </Button>
         </Grid>
         <Snackbar
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}

@@ -59,12 +59,16 @@ function Goods() {
           return <Grid item xs={12} sm={6} md={4} key={good.id}>
             <Card sx={{ borderRadius: 3, m: 3, maxWidth: 345 }} >
               <CardActionArea component={Link} to={`/users/${id.user_id}/goods/${good.id}`}>
-                <CardMedia
-                  component="img"
-                  height="140"
-                // image=".jpg"
-                // alt="..."
-                />
+                {(good.images[0] !== undefined) ?
+                  <CardMedia
+                    component="img"
+                    height="140"
+                    src={good.images[0].url}
+                    alt="good ..."
+                  >
+                  </CardMedia>
+                  : null
+                }
                 <CardContent>
                   <Typography gutterBottom variant="h5" component="div">
                     {good.year}
