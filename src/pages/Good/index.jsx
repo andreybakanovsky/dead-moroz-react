@@ -16,6 +16,7 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 
 function Good() {
   const id = useParams();
@@ -40,7 +41,6 @@ function Good() {
 
   const onSubmit = async (data) => {
     const formData = new FormData();
-    console.log("data", data);
     try {
       setIsLoading(true);
 
@@ -109,8 +109,6 @@ function Good() {
       chosenfiles.push(files[i]);
     }
     setFilesSuggested(chosenfiles);
-    chosenfiles.map((file) => {
-    })
   }
 
   return (
@@ -193,11 +191,12 @@ function Good() {
                 />
                 <Button
                   sx={{ mr: '1rem' }}
-                  variant="contained"
+                  variant="outlined"
                   color="primary"
                   onClick={openFileDialog}
+                  startIcon={<AddAPhotoIcon />}
                 >
-                  upload photo
+                  Upload
                 </Button>
               </Grid>
             </Grid>
@@ -219,7 +218,6 @@ function Good() {
             })}
 
             {filesSuggested && filesSuggested.map((file, i) => {
-              console.log("here", file);
               return (
                 <ImageListItem key={-i}>
                   <img
