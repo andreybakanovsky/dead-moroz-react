@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import {
@@ -15,10 +15,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import validationSchema from "./validation";
 import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
+import ImageList from '@mui/material/ImageList';
+import ImageListItem from '@mui/material/ImageListItem';
 
 const style = {
   position: 'absolute',
-  top: '31%',
+  top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: 500,
@@ -30,12 +33,16 @@ const style = {
 
 const AddGood = (props) => {
   const id = useParams();
-  const handleClose = () => props.setStateModal(false)
+  const handleClose = () => {
+    props.setStateModal(false)
+    setFilesSuggested(undefined);
+  }
   const {
     control,
     handleSubmit,
     formState: { errors },
     setError,
+    reset,
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
@@ -45,6 +52,8 @@ const AddGood = (props) => {
   const onGoods = () => {
     navigate(`/users/${auth.user.id}/goods`);
   };
+  const inputFile = useRef(null);
+  const [filesSuggested, setFilesSuggested] = useState();
 
   const onSubmit = async (data) => {
     if (data.content === '') {
@@ -54,10 +63,18 @@ const AddGood = (props) => {
       });
       return;
     }
+
+    const formData = new FormData();
+
     try {
-      console.log("id", id);
-      console.log("data", data);
-      await api.auth.addGood(id, { "good": data });
+      formData.append('good[year]', data.year);
+      formData.append('good[content]', data.content);
+      if (filesSuggested) {
+        for (let i = 0; i < filesSuggested.length; i++) {
+          formData.append("good[images][]", filesSuggested[i], filesSuggested[i].name)
+        }
+      }
+      await api.auth.addGood(id, formData);
     } catch (e) {
       if (e.response.status === 422) {
         Object.keys(e.response.data).forEach((key) => {
@@ -70,12 +87,26 @@ const AddGood = (props) => {
     } finally {
       handleClose();
       onGoods();
+      reset();
     }
   };
 
   const onCancel = () => {
     handleClose();
   };
+
+  const openFileDialog = () => {
+    inputFile.current.click();
+  };
+
+  const changeHandler = (e) => {
+    const chosenfiles = [];
+    const files = e.target.files;
+    for (let i = 0; i < files.length; i++) {
+      chosenfiles.push(files[i]);
+    }
+    setFilesSuggested(chosenfiles);
+  }
 
   return (
     <Modal
@@ -122,6 +153,20 @@ const AddGood = (props) => {
               />
             )}
           />
+          {(filesSuggested) ? (
+            < ImageList sx={{ width: "auto", height: 220 }} rowHeight={200} variant="masonry">
+              {filesSuggested && filesSuggested.map((file, i) => {
+                return (
+                  <ImageListItem key={i}>
+                    <img
+                      src={URL.createObjectURL(file)}
+                      srcSet={URL.createObjectURL(file)}
+                      alt={"photo... "}
+                      loading="lazy"
+                    />
+                  </ImageListItem>)
+              })}
+            </ImageList>) : null}
           <Button
             sx={{ m: '1rem' }}
             variant="contained"
@@ -130,20 +175,35 @@ const AddGood = (props) => {
           >
             Cancel
           </Button>
+          <input
+            style={{ display: 'none' }}
+            type="file"
+            multiple ref={inputFile}
+            name='image-uploader-1234556'
+            id="image-uploader-1234556"
+            onInput={(e) => changeHandler(e)}
+            accept="image/*"
+            value=''
+          />
+          <Button
+            variant="outlined"
+            startIcon={<AddAPhotoIcon />}
+            onClick={openFileDialog}
+          >
+            Upload
+          </Button>
           <Button
             sx={{ m: '1rem' }}
             variant="contained"
             color="primary"
             type="submit"
           >
-            Add
+            Add the good
           </Button>
         </Box>
       </form>
     </Modal>
-
   );
-
 }
 
 export default AddGood;
