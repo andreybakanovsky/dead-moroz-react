@@ -20,6 +20,9 @@ const endpoints = {
   deleteGood: (id) => axios.delete(`/v1/users/${id.user_id}/goods/${id.good_id}`),
 
   getRequestedGifts: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/gifts`),
+  addGift: (id, data) => axios.post(`/v1/users/${id.user_id}/goods/${id.good_id}/gifts`, data),
+  deleteRequestedGifts: (id) => axios.delete(`/v1/users/${id.user_id}/goods/${id.good_id}/gifts/${id.id}`),
+
   getRequestedGift: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/gifts/${id.id}`),
 
   getReviews: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews`),
