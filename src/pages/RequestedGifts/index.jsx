@@ -7,8 +7,6 @@ import {
 } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-
-import api from "../../services/api";
 import {
   useParams,
   useNavigate
@@ -16,7 +14,11 @@ import {
 import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import AddGift from "../../pages/AddGift";
+import EditIcon from '@mui/icons-material/Edit';
+
+import api from "../../services/api";
+import AddGift from "../AddGift";
+import GiftUpdate from "../GiftUpdate";
 
 function RequestedGifts() {
   const id = useParams();
@@ -47,9 +49,21 @@ function RequestedGifts() {
     maxHeight: '100%',
   });
 
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = (state) => setOpen(state);
+  const [openAdd, setOpenAdd] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [editGiftIds, setEditGiftIds] = useState(null);
+
+  const handleOpenAdd = () => setOpenAdd(true);
+  const handleOpenEdit = (giftId) => {
+    setOpenEdit(true);
+    setEditGiftIds({ ...id, id: `${giftId}` });
+  };
+
+  const handleCloseAdd = (state) => { setOpenAdd(state) }
+  const handleCloseEdit = (state) => {
+    setOpenEdit(state); // the state see in a modal form
+    setEditGiftIds(null);
+  }
 
   const onDelete = async (giftId, giftName) => {
     var result = window.confirm(`Would you like to delete the "${giftName} ..." gift?`);
@@ -59,7 +73,6 @@ function RequestedGifts() {
           ...id,
           "id": `${giftId}`
         }
-        console.log(allId);
         const data = await api.auth.deleteRequestedGifts(allId);
         if (data.status === 204) {
           navigate(`/users/${id.user_id}/goods/${id.good_id}/gifts`);
@@ -85,7 +98,7 @@ function RequestedGifts() {
           color="primary"
           aria-label="upload picture"
           component="span"
-          onClick={handleOpen}
+          onClick={() => handleOpenAdd()}
         >
           <AddIcon
             className="dead-moroz-red-color"
@@ -98,8 +111,8 @@ function RequestedGifts() {
         direction="row"
       >
       </Grid>
-      {data && data.map(requestedGifts => {
-        return <Grid sx={{ m: 2 }} key={requestedGifts.id}>
+      {data && data.map(requestedGift => {
+        return <Grid sx={{ m: 2 }} key={requestedGift.id}>
           <Paper
             sx={{
               p: 2,
@@ -113,16 +126,23 @@ function RequestedGifts() {
                 <Grid item xs container direction="column" spacing={2}>
                   <Grid item xs>
                     <Typography gutterBottom variant="subtitle1" component="div">
-                      {requestedGifts.name}
+                      {requestedGift.name}
                     </Typography>
                     <Typography variant="body2" gutterBottom>
-                      {requestedGifts.description}
+                      {requestedGift.description}
                     </Typography>
                   </Grid>
                   <Grid item>
+                    <IconButton aria-label="edit"
+                      onClick={() => handleOpenEdit(requestedGift.id)}
+                    >
+                      <EditIcon
+                        sx={{ color: 'darkgray', fontSize: 20 }}
+                      />
+                    </IconButton>
                     <IconButton
                       aria-label="edit"
-                      onClick={() => onDelete(requestedGifts.id, requestedGifts.name)}
+                      onClick={() => onDelete(requestedGift.id, requestedGift.name)}
                     >
                       <DeleteOutlineIcon
                         sx={{ color: 'darkgray', fontSize: 24 }}
@@ -135,8 +155,8 @@ function RequestedGifts() {
 
               <Grid item>
                 <ButtonBase sx={{ width: 200, height: 200 }}>
-                  {(requestedGifts.images[0] !== undefined) ?
-                    <Img alt="" src={requestedGifts.images[0].url} />
+                  {(requestedGift.images[0] !== undefined) ?
+                    <Img alt="" src={requestedGift.images[0].url} />
                     : null
                   }
                 </ButtonBase>
@@ -146,7 +166,11 @@ function RequestedGifts() {
           </Paper>
         </Grid>
       })}
-      <AddGift setStateModal={handleClose} stateOpen={open} />
+      <AddGift setStateModal={handleCloseAdd} stateOpen={openAdd} />
+      <GiftUpdate
+        setStateModal={handleCloseEdit}
+        stateOpen={openEdit}
+        ids={editGiftIds} />
     </Container>
   );
 }
