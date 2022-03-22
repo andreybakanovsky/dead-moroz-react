@@ -35,7 +35,8 @@ const AddGift = (props) => {
   const id = useParams();
   const handleClose = () => {
     props.setStateModal(false)
-    setFilesSuggested(undefined);
+    setFilesSuggested(null);
+    reset();
   }
   const {
     control,
@@ -49,8 +50,8 @@ const AddGift = (props) => {
   const navigate = useNavigate();
   const auth = useAuth();
 
-  const onGoods = () => {
-    navigate(`/users/${auth.user.id}/goods/${id.good_id}/gifts`);
+  const onGifts = () => {
+    navigate(`/users/${id.user_id}/goods/${id.good_id}/gifts`);
   };
   const inputFile = useRef(null);
   const [filesSuggested, setFilesSuggested] = useState();
@@ -78,7 +79,7 @@ const AddGift = (props) => {
       }
     } finally {
       handleClose();
-      onGoods();
+      onGifts();
       reset();
     }
   };
@@ -108,11 +109,17 @@ const AddGift = (props) => {
     >
       <form onSubmit={handleSubmit(onSubmit)}>
         <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            I'd like to have ...
+          <Typography
+            id="modal-modal-title"
+            variant="h6"
+            component="h2"
+            textAlign="center"
+            sx={{ mb: '0.5rem' }}>
+            Requesting gift
           </Typography>
           <Controller
             name="name"
+            defaultValue=""
             control={control}
             render={({ field }) => (
               <TextField
