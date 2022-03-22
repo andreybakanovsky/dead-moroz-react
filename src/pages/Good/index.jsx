@@ -104,7 +104,7 @@ function Good() {
   const changeHandler = (e) => {
     const chosenfiles = [];
     const files = e.target.files;
-    if (files.length > 0) setFilesCurrent(undefined);
+    if (files.length > 0) setFilesCurrent(null);
     for (let i = 0; i < files.length; i++) {
       chosenfiles.push(files[i]);
     }
