@@ -81,7 +81,7 @@ function Users() {
               gutterBottom
               component="div"
               sx={{ ml: 2, display: 'inline-block' }}
-              component={Link} to={`/users/${user.id}/goods/`}
+              component={Link} to={`/users/${user.id}/goods/`} state={user}
               underline="none"
             >
               {user.name}

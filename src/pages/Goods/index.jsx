@@ -8,23 +8,46 @@ import {
   CardActions,
   Typography,
   Grid,
-  IconButton
+  IconButton,
+  Avatar,
 } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
-
-import api from "../../services/api";
 import {
   useParams,
   useNavigate,
   Link,
+  useLocation,
 } from 'react-router-dom';
+
 import '../../styles/App.css';
+import api from "../../services/api";
+import useAuth from "../../hooks/useAuth";
 
 function Goods() {
   let id = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState();
+  const auth = useAuth();
+
+  const location = useLocation();
+  const [user, setUser] = useState(location.state); // ! 
+
+  const loadUser = useCallback(async () => {
+    try {
+      const response = await api.auth.getUser(id);
+      setUser(response.data);
+    } catch (e) {
+      console.log(e.response.status)
+      console.log(e.response.data)
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (user === null) {
+      loadUser();
+    }
+  }, []);
 
   const loadData = useCallback(async () => {
     try {
@@ -51,7 +74,17 @@ function Goods() {
         justifyContent="center"
         alignItems="center"
       >
-        <h2>MY GOOD</h2>
+        {(user) &&
+          <>
+            {(auth.user.id === user.id) ?
+              <h2>MY GOOD</h2>
+              :
+              <>
+                <Avatar alt="Remy Sharp" src={user.avatar} />
+                <h2>{user.name} - GOOD</h2>
+              </>}
+          </>
+        }
       </Grid>
       <Grid
         container
@@ -91,15 +124,16 @@ function Goods() {
                   {good.content}
                 </Typography>
               </CardContent>
-              <CardActions> 
-              <IconButton aria-label="gift"
-              component={Link} to={`/users/${id.user_id}/goods/${good.id}/gifts`}
-              >
-                <CardGiftcardIcon
-                  className="dead-moroz-red-color"
-                  sx={{ fontSize: 26 }}
-                />
-              </IconButton>
+              <CardActions>
+                <IconButton aria-label="gift"
+                  component={Link} to={`/users/${id.user_id}/goods/${good.id}/gifts`}
+                  state={{ good, user }}
+                >
+                  <CardGiftcardIcon
+                    className="dead-moroz-red-color"
+                    sx={{ fontSize: 26 }}
+                  />
+                </IconButton>
               </CardActions>
             </Card>
           </Grid>
