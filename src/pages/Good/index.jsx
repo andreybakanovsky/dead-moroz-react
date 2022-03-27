@@ -5,12 +5,14 @@ import {
   Container,
   Button,
   Snackbar,
+  Avatar,
 } from "@mui/material";
 import { yupResolver } from "@hookform/resolvers/yup";
 import validationSchema from "./validation";
 import {
   useParams,
   useNavigate,
+  useLocation,
 } from 'react-router-dom';
 import { useForm, Controller } from "react-hook-form";
 import ImageList from '@mui/material/ImageList';
@@ -31,6 +33,10 @@ function Good() {
   const [filesSuggested, setFilesSuggested] = useState();
   const [filesCurrent, setFilesCurrent] = useState();
   const auth = useAuth();
+
+  const location = useLocation();
+  const [user, setUser] = useState(location.state ? location.state.user : null);
+  const [good, setGood] = useState(location.state ? location.state.good : null);
 
   const {
     control,
@@ -116,15 +122,27 @@ function Good() {
 
   return (
     <Container >
+      <Grid
+        container
+        direction="row"
+        justifyContent="center"
+        alignItems="center"
+      >
+        {(user && good) &&
+          <>
+            {(auth.user.id === user.id) ?
+              <>
+                <h2>My {good.year} - Good</h2>
+              </>
+              :
+              <>
+                <Avatar alt={user.name} src={user.avatar} />
+                <h2>{user.name} - {good.year} - Good</h2>
+              </>
+            }
+          </>}
+      </Grid>
       <Grid container spacing={2}>
-        <Grid
-          container
-          direction="row"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <h2>MY {year}'s GOOD</h2>
-        </Grid>
         <Grid item xs={4}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Grid container spacing={3}>

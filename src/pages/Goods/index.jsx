@@ -81,7 +81,7 @@ function Goods() {
               <h2>MY GOOD</h2>
               :
               <>
-                <Avatar alt="Remy Sharp" src={user.avatar} />
+                <Avatar alt={user.name} src={user.avatar} />
                 <h2>{user.name} - GOOD</h2>
               </>}
           </>
@@ -102,6 +102,7 @@ function Goods() {
                 action={
                   <IconButton aria-label="edit"
                     component={Link} to={`/users/${id.user_id}/goods/${good.id}`}
+                    state={{ good, user }}
                   >
                     {(id.user_id == auth.user.id) ?
                       <EditIcon
