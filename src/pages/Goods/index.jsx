@@ -12,6 +12,7 @@ import {
   Avatar,
 } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
+import OpenInBrowserIcon from '@mui/icons-material/OpenInBrowser';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import {
   useParams,
@@ -102,9 +103,15 @@ function Goods() {
                   <IconButton aria-label="edit"
                     component={Link} to={`/users/${id.user_id}/goods/${good.id}`}
                   >
-                    <EditIcon
-                      sx={{ color: 'darkgray', fontSize: 20 }}
-                    />
+                    {(id.user_id == auth.user.id) ?
+                      <EditIcon
+                        sx={{ color: 'darkgray', fontSize: 20 }}
+                      />
+                      :
+                      <OpenInBrowserIcon
+                        sx={{ color: 'darkgray', fontSize: 20 }}
+                      />
+                    }
                   </IconButton>
                 }
               >

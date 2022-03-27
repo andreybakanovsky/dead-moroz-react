@@ -146,17 +146,18 @@ function RequestedGifts() {
               </>
             }
           </>}
-        <IconButton
-          color="primary"
-          aria-label="upload picture"
-          component="span"
-          onClick={() => handleOpenAdd()}
-        >
-          <AddIcon
-            className="dead-moroz-red-color"
-            sx={{ fontSize: 32 }}
-          />
-        </IconButton>
+        {(id.user_id == auth.user.id) &&
+          <IconButton
+            color="primary"
+            aria-label="upload picture"
+            component="span"
+            onClick={() => handleOpenAdd()}
+          >
+            <AddIcon
+              className="dead-moroz-red-color"
+              sx={{ fontSize: 32 }}
+            />
+          </IconButton>}
       </Grid>
       <Grid
         container
@@ -185,23 +186,24 @@ function RequestedGifts() {
                         {requestedGift.description}
                       </Typography>
                     </Grid>
-                    <Grid item>
-                      <IconButton aria-label="edit"
-                        onClick={() => handleOpenEdit(requestedGift.id)}
-                      >
-                        <EditIcon
-                          sx={{ color: 'darkgray', fontSize: 20 }}
-                        />
-                      </IconButton>
-                      <IconButton
-                        aria-label="edit"
-                        onClick={() => onDelete(requestedGift.id, requestedGift.name)}
-                      >
-                        <DeleteOutlineIcon
-                          sx={{ color: 'darkgray', fontSize: 24 }}
-                        />
-                      </IconButton>
-                    </Grid>
+                    {(id.user_id == auth.user.id) &&
+                      <Grid item>
+                        <IconButton aria-label="edit"
+                          onClick={() => handleOpenEdit(requestedGift.id)}
+                        >
+                          <EditIcon
+                            sx={{ color: 'darkgray', fontSize: 20 }}
+                          />
+                        </IconButton>
+                        <IconButton
+                          aria-label="edit"
+                          onClick={() => onDelete(requestedGift.id, requestedGift.name)}
+                        >
+                          <DeleteOutlineIcon
+                            sx={{ color: 'darkgray', fontSize: 24 }}
+                          />
+                        </IconButton>
+                      </Grid>}
                   </Grid>
 
                 </Grid>
