@@ -18,6 +18,7 @@ import Typography from '@mui/material/Typography';
 import ButtonBase from '@mui/material/ButtonBase';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -33,7 +34,6 @@ import Divider from '@mui/material/Divider';
 import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
 import validationSchema from "./validation";
-import comments from './comments';
 
 function Reviews() {
   const id = useParams();
@@ -131,6 +131,10 @@ function Reviews() {
   const onSubmit = async (data) => {
     try {
       setIsLoading(true);
+      data.comment = JSON.stringify({
+        "comment": data.comment,
+        "author": auth.user.name
+      });
       data = {
         ...data,
         "user_id": auth.user.id,
@@ -155,11 +159,32 @@ function Reviews() {
   };
 
   const getGrade = () => Math.round(Math.random() * 5) + 5;
-  const getComment = () => comments[Math.floor(Math.random() * comments.length)]
   const getDate = (date) => {
     const postDate = new Date(date);
     return postDate.toLocaleDateString('en-US',)
   }
+
+  const getComment = (stringComment) => JSON.parse(stringComment).comment
+  const getAuthor = (stringComment) => JSON.parse(stringComment).author
+
+  const onDelete = async (reviewId) => {
+    var result = window.confirm(`Would you like to delete the review?`);
+    try {
+      if (result) {
+        const allIds = {
+          ...id,
+          "id": `${reviewId}`
+        }
+        const data = await api.auth.deleteReview(allIds);
+        const response = await api.auth.getReviews(id);
+        setReviews(response.data);
+      }
+    } catch (e) {
+      console.log(e.response.status);
+      console.log(e.response.data);
+    } finally {
+    }
+  };
 
   return (
     <Container >
@@ -260,11 +285,11 @@ function Reviews() {
                 A new review:
               </Typography>
             </Grid>
-            <Grid item xs={1.7}  >
+            <Grid item xs={1.3}  >
               <Controller
                 name="grade"
-                defaultValue=""
                 control={control}
+                defaultValue=""
                 render={({ field }) => (
                   <TextField
                     id="textField-1"
@@ -278,6 +303,21 @@ function Reviews() {
                   />
                 )}
               />
+            </Grid>
+            <Grid item xs={0.5}  >
+              <IconButton
+                color="primary"
+                aria-label="magic"
+                component="span"
+                onClick={() => {
+                  setValue("grade", getGrade());
+                }}
+              >
+                <AutoFixHighIcon
+                  className="dead-moroz-red-color"
+                  sx={{ transform: "rotate(180deg)", fontSize: 26, mr: 1 }}
+                />
+              </IconButton>
             </Grid>
             <Grid item xs={6}>
               <Controller
@@ -301,28 +341,14 @@ function Reviews() {
                 )}
               />
             </Grid>
-            <Grid item xs={3}>
-              <IconButton
-                color="primary"
-                aria-label="magic"
-                component="span"
-                onClick={() => {
-                  setValue("grade", getGrade());
-                  setValue("comment", getComment())
-                }}
-              >
-                <AutoFixHighIcon
-                  className="dead-moroz-red-color"
-                  sx={{ transform: "rotate(180deg)", fontSize: 26, mr: 1 }}
-                />
-              </IconButton>
+            <Grid item xs={2}>
               <Button
                 variant="contained"
                 color="primary"
                 type="submit"
                 disabled={isLoading}
               >
-                Add review
+                Add the review
               </Button>
             </Grid>
           </Grid>
@@ -332,9 +358,10 @@ function Reviews() {
             <TableHead>
               <TableRow>
                 <TableCell sx={{ width: "10%" }}>Grade</TableCell>
-                <TableCell sx={{ width: "50%" }}>Comment</TableCell>
+                <TableCell sx={{ width: "40%" }}>Comment</TableCell>
                 <TableCell sx={{ width: "15%" }}>Author</TableCell>
                 <TableCell sx={{ width: "15%" }}>Created</TableCell>
+                <TableCell sx={{ width: "10%" }}>Tools</TableCell>
                 <TableCell sx={{ width: "10%" }}>Gifts</TableCell>
               </TableRow>
             </TableHead>
@@ -345,9 +372,23 @@ function Reviews() {
                   sx={{ height: 10 }}
                 >
                   <TableCell sx={{ padding: "0px 16px" }}>{review.grade}</TableCell>
-                  <TableCell sx={{ padding: "0px 16px" }}>{review.comment}</TableCell>
-                  <TableCell sx={{ padding: "0px 16px" }}>{review.user_id}</TableCell>
+                  <TableCell sx={{ padding: "0px 16px" }}>{getComment(review.comment)}</TableCell>
+                  <TableCell sx={{ padding: "0px 16px" }}>{getAuthor(review.comment)}</TableCell>
                   <TableCell sx={{ padding: "0px 16px" }}>{getDate(review.created_at)}</TableCell>
+                  <TableCell sx={{ padding: "0px 16px" }}>
+                    {(review.user_id === auth.user.id) &&
+                      <>
+                        <IconButton
+                          aria-label="edit"
+                          onClick={() => onDelete(review.id)}
+                        >
+                          <DeleteOutlineIcon
+                            sx={{ color: 'darkgray', fontSize: 24 }}
+                          />
+                        </IconButton>
+                      </>
+                    }
+                  </TableCell>
                   <TableCell sx={{ padding: "0px 16px" }}>
                     <IconButton aria-label="gift">
                       <CardGiftcardIcon
