@@ -19,6 +19,7 @@ import ButtonBase from '@mui/material/ButtonBase';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import EditIcon from '@mui/icons-material/Edit';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -41,6 +42,8 @@ function Reviews() {
   const [reviews, setReviews] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const auth = useAuth();
+  const [editMode, setEditMode] = useState(false);
+  const [editReview, setEditReview] = useState(null);
 
   const location = useLocation();
   const [user, setUser] = useState(location.state ? location.state.user : null);
@@ -129,18 +132,27 @@ function Reviews() {
   });
 
   const onSubmit = async (data) => {
+    data.comment = JSON.stringify({
+      "comment": data.comment,
+      "author": auth.user.name
+    });
+
+    data = {
+      ...data,
+      "user_id": auth.user.id,
+      "good_id": id.good_id
+    }
+
     try {
       setIsLoading(true);
-      data.comment = JSON.stringify({
-        "comment": data.comment,
-        "author": auth.user.name
-      });
-      data = {
-        ...data,
-        "user_id": auth.user.id,
-        "good_id": id.good_id
+      if (editMode === false) {
+        await api.auth.addReview(id, data);
       }
-      await api.auth.addReview(id, data);
+      else {
+        console.log(ids(editReview));
+        console.log(data);
+        await api.auth.updateReview(ids(editReview), data);
+      };
       const response = await api.auth.getReviews(id);
       setReviews(response.data);
     } catch (e) {
@@ -153,8 +165,13 @@ function Reviews() {
         });
       }
     } finally {
-      reset();
+      reset({
+        grade: '',
+        comment: ''
+      });
       setIsLoading(false);
+      setEditMode(false);
+      setEditReview(null);
     }
   };
 
@@ -185,6 +202,23 @@ function Reviews() {
     } finally {
     }
   };
+
+  const ids = (lastId) => {
+    return {
+      ...id,
+      "id": `${lastId}`
+    }
+  }
+
+  const onEditReview = useCallback(async (reviewId) => {
+    const { data } = await api.auth.getReview(ids(reviewId));
+    setEditMode(true);
+    setEditReview(reviewId);
+    reset({
+      grade: data.grade,
+      comment: getComment(data.comment)
+    });
+  }, [reset]);
 
   return (
     <Container >
@@ -342,14 +376,24 @@ function Reviews() {
               />
             </Grid>
             <Grid item xs={2}>
-              <Button
-                variant="contained"
-                color="primary"
-                type="submit"
-                disabled={isLoading}
-              >
-                Add the review
-              </Button>
+              {(editMode !== true) ?
+                <Button
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  disabled={isLoading}
+                >
+                  Add the review
+                </Button>
+                :
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disabled={isLoading}
+                  type="submit"
+                >
+                  Update
+                </Button>}
             </Grid>
           </Grid>
         </form>
@@ -378,6 +422,13 @@ function Reviews() {
                   <TableCell sx={{ padding: "0px 16px" }}>
                     {(review.user_id === auth.user.id) &&
                       <>
+                        <IconButton aria-label="edit"
+                          onClick={() => onEditReview(review.id)}
+                        >
+                          <EditIcon
+                            sx={{ color: 'darkgray', fontSize: 20 }}
+                          />
+                        </IconButton>
                         <IconButton
                           aria-label="edit"
                           onClick={() => onDelete(review.id)}
