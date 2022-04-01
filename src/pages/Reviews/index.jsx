@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   Container,
   Paper,
@@ -20,6 +20,7 @@ import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditIcon from '@mui/icons-material/Edit';
+import EditOffIcon from '@mui/icons-material/EditOff';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -43,7 +44,8 @@ function Reviews() {
   const [isLoading, setIsLoading] = useState(false);
   const auth = useAuth();
   const [editMode, setEditMode] = useState(false);
-  const [editReview, setEditReview] = useState(null);
+  const [editReviewId, setEditReviewId] = useState(null);
+  const commentInputRef = useRef(null);
 
   const location = useLocation();
   const [user, setUser] = useState(location.state ? location.state.user : null);
@@ -149,9 +151,7 @@ function Reviews() {
         await api.auth.addReview(id, data);
       }
       else {
-        console.log(ids(editReview));
-        console.log(data);
-        await api.auth.updateReview(ids(editReview), data);
+        await api.auth.updateReview(ids(editReviewId), data);
       };
       const response = await api.auth.getReviews(id);
       setReviews(response.data);
@@ -171,7 +171,7 @@ function Reviews() {
       });
       setIsLoading(false);
       setEditMode(false);
-      setEditReview(null);
+      setEditReviewId(null);
     }
   };
 
@@ -213,12 +213,22 @@ function Reviews() {
   const onEditReview = useCallback(async (reviewId) => {
     const { data } = await api.auth.getReview(ids(reviewId));
     setEditMode(true);
-    setEditReview(reviewId);
+    setEditReviewId(reviewId);
+    commentInputRef.current.focus();
     reset({
       grade: data.grade,
       comment: getComment(data.comment)
     });
   }, [reset]);
+
+  const OnCancel = () => {
+    reset({
+      grade: '',
+      comment: ''
+    });
+    setEditMode(false);
+    setEditReviewId(null);
+  }
 
   return (
     <Container >
@@ -316,7 +326,7 @@ function Reviews() {
           <Grid container spacing={1}>
             <Grid item xs={1.3} >
               <Typography sx={{ display: 'inline-block', mt: 0.8 }} gutterBottom variant="subtitle1" component="div">
-                A new review:
+                {(!editMode) ? "A new review:" : "Edit the review:"}
               </Typography>
             </Grid>
             <Grid item xs={1.3}  >
@@ -371,11 +381,12 @@ function Reviews() {
                     label="Comment"
                     variant="outlined"
                     helperText={errors.comment?.message}
+                    inputRef={commentInputRef}
                   />
                 )}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={2.5}>
               {(editMode !== true) ?
                 <Button
                   variant="contained"
@@ -386,26 +397,40 @@ function Reviews() {
                   Add the review
                 </Button>
                 :
-                <Button
-                  variant="contained"
-                  color="primary"
-                  disabled={isLoading}
-                  type="submit"
-                >
-                  Update
-                </Button>}
+                <>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={isLoading}
+                    type="submit"
+                  >
+                    Update
+                  </Button>
+                  <Button
+                    sx={{ ml: 1 }}
+                    variant="contained"
+                    color="inherit"
+                    disabled={isLoading}
+                    onClick={OnCancel}
+                  >
+                    Cancel
+                  </Button>
+                </>
+              }
             </Grid>
           </Grid>
         </form>
         <TableContainer component={Paper} sx={{ mt: 2 }}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
-            <TableHead>
-              <TableRow>
+            <TableHead
+              sx={{ backgroundColor: "#f5f0f0" }}
+            >
+              <TableRow >
                 <TableCell sx={{ width: "10%" }}>Grade</TableCell>
                 <TableCell sx={{ width: "40%" }}>Comment</TableCell>
                 <TableCell sx={{ width: "15%" }}>Author</TableCell>
-                <TableCell sx={{ width: "15%" }}>Created</TableCell>
-                <TableCell sx={{ width: "10%" }}>Tools</TableCell>
+                <TableCell sx={{ width: "10%" }}>Changed</TableCell>
+                <TableCell sx={{ width: "15%" }}>Tools</TableCell>
                 <TableCell sx={{ width: "10%" }}>Gifts</TableCell>
               </TableRow>
             </TableHead>
@@ -414,29 +439,41 @@ function Reviews() {
                 <TableRow
                   key={review.id}
                   sx={{ height: 10 }}
+                  sx={{ fontStyle: (editMode && editReviewId === review.id) ? 'italic' : undefined }}
+                  selected={(editMode && editReviewId === review.id)}
                 >
                   <TableCell sx={{ padding: "0px 16px" }}>{review.grade}</TableCell>
                   <TableCell sx={{ padding: "0px 16px" }}>{getComment(review.comment)}</TableCell>
                   <TableCell sx={{ padding: "0px 16px" }}>{getAuthor(review.comment)}</TableCell>
-                  <TableCell sx={{ padding: "0px 16px" }}>{getDate(review.created_at)}</TableCell>
+                  <TableCell sx={{ padding: "0px 16px" }}>{getDate(review.updated_at)}</TableCell>
                   <TableCell sx={{ padding: "0px 16px" }}>
                     {(review.user_id === auth.user.id) &&
                       <>
-                        <IconButton aria-label="edit"
-                          onClick={() => onEditReview(review.id)}
-                        >
-                          <EditIcon
-                            sx={{ color: 'darkgray', fontSize: 20 }}
-                          />
-                        </IconButton>
-                        <IconButton
-                          aria-label="edit"
-                          onClick={() => onDelete(review.id)}
-                        >
-                          <DeleteOutlineIcon
-                            sx={{ color: 'darkgray', fontSize: 24 }}
-                          />
-                        </IconButton>
+                        {(editReviewId !== review.id) ?
+                          <IconButton aria-label="edit"
+                            onClick={() => onEditReview(review.id)}
+                          >
+                            <EditIcon
+                              sx={{ color: 'darkgray', fontSize: 24 }}
+                            />
+                          </IconButton>
+                          :
+                          <IconButton aria-label="cancel edit"
+                            onClick={() => OnCancel(review.id)}
+                          >
+                            <EditOffIcon
+                              sx={{ color: 'darkgray', fontSize: 24 }}
+                            />
+                          </IconButton>}
+                        {(!editMode) &&
+                          <IconButton
+                            aria-label="delete"
+                            onClick={() => onDelete(review.id)}
+                          >
+                            <DeleteOutlineIcon
+                              sx={{ color: 'darkgray', fontSize: 24 }}
+                            />
+                          </IconButton>}
                       </>
                     }
                   </TableCell>
