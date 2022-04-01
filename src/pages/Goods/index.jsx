@@ -14,6 +14,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import OpenInBrowserIcon from '@mui/icons-material/OpenInBrowser';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
+import ReviewsIcon from '@mui/icons-material/Reviews';
 import {
   useParams,
   useNavigate,
@@ -142,6 +143,17 @@ function Goods() {
                     sx={{ fontSize: 26 }}
                   />
                 </IconButton>
+                {(auth.user.role === "elf") &&
+                  <IconButton aria-label="gift"
+                    component={Link} to={`/users/${id.user_id}/goods/${good.id}/reviews`}
+                    state={{ user, good }}
+                  >
+                    <ReviewsIcon
+                      className="dead-moroz-green-color"
+                      sx={{ fontSize: 26 }}
+                    />
+
+                  </IconButton>}
               </CardActions>
             </Card>
           </Grid>
