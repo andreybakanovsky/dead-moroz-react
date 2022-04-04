@@ -21,6 +21,7 @@ import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffIcon from '@mui/icons-material/EditOff';
+import AddIcon from '@mui/icons-material/Add';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -36,6 +37,7 @@ import Divider from '@mui/material/Divider';
 import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
 import validationSchema from "./validation";
+import GiftAddSuggestion from "../GiftAddSuggestion";
 
 function Reviews() {
   const id = useParams();
@@ -51,6 +53,14 @@ function Reviews() {
   const [user, setUser] = useState(location.state ? location.state.user : null);
   const [good, setGood] = useState(location.state ? location.state.good : null);
   const [requestedGifts, setRequestedGifts] = useState(null);
+  const [openAdd, setOpenAdd] = useState(false);
+  const [reviewIds, setreviewIds] = useState(null);
+
+  const handleOpenAdd = (reviewId) => {
+    setOpenAdd(true);
+    setreviewIds({ ...id, review_id: `${reviewId}` });
+  }
+  const handleCloseAdd = (state) => { setOpenAdd(state) }
 
   const {
     control,
@@ -431,7 +441,12 @@ function Reviews() {
                 <TableCell sx={{ width: "15%" }}>Author</TableCell>
                 <TableCell sx={{ width: "10%" }}>Changed</TableCell>
                 <TableCell sx={{ width: "15%" }}>Tools</TableCell>
-                <TableCell sx={{ width: "10%" }}>Gifts</TableCell>
+                <TableCell sx={{ width: "10%" }}>
+                  <CardGiftcardIcon
+                    className="dead-moroz-green-color"
+                    sx={{ fontSize: 24 }}
+                  />
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -442,11 +457,11 @@ function Reviews() {
                   sx={{ fontStyle: (editMode && editReviewId === review.id) ? 'italic' : undefined }}
                   selected={(editMode && editReviewId === review.id)}
                 >
-                  <TableCell sx={{ padding: "0px 16px" }}>{review.grade}</TableCell>
-                  <TableCell sx={{ padding: "0px 16px" }}>{getComment(review.comment)}</TableCell>
-                  <TableCell sx={{ padding: "0px 16px" }}>{getAuthor(review.comment)}</TableCell>
-                  <TableCell sx={{ padding: "0px 16px" }}>{getDate(review.updated_at)}</TableCell>
-                  <TableCell sx={{ padding: "0px 16px" }}>
+                  <TableCell sx={{ padding: "16px 16px" }}>{review.grade}</TableCell>
+                  <TableCell sx={{ padding: "16px 16px" }}>{getComment(review.comment)}</TableCell>
+                  <TableCell sx={{ padding: "16px 16px" }}>{getAuthor(review.comment)}</TableCell>
+                  <TableCell sx={{ padding: "16px 16px" }}>{getDate(review.updated_at)}</TableCell>
+                  <TableCell sx={{ padding: "10px 16px" }}>
                     {(review.user_id === auth.user.id) &&
                       <>
                         {(editReviewId !== review.id) ?
@@ -478,12 +493,18 @@ function Reviews() {
                     }
                   </TableCell>
                   <TableCell sx={{ padding: "0px 16px" }}>
-                    <IconButton aria-label="gift">
-                      <CardGiftcardIcon
-                        className="dead-moroz-green-color"
-                        sx={{ fontSize: 26 }}
-                      />
-                    </IconButton>
+                    {(review.user_id === auth.user.id) &&
+                      <IconButton
+                        color="primary"
+                        aria-label="upload picture"
+                        component="span"
+                        onClick={() => handleOpenAdd(review.id)}
+                      >
+                        <AddIcon
+                          className="dead-moroz-red-color"
+                          sx={{ fontSize: 24 }}
+                        />
+                      </IconButton>}
                   </TableCell>
                 </TableRow>
               )}
@@ -491,6 +512,11 @@ function Reviews() {
           </Table>
         </TableContainer>
       </Paper >
+      <GiftAddSuggestion
+        setStateModal={handleCloseAdd}
+        stateOpen={openAdd}
+        ids={reviewIds}
+      />
     </Container>
   );
 }
