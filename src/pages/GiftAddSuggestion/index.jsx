@@ -57,8 +57,10 @@ const GiftAddSuggestion = (props) => {
         }
       }
       await api.auth.addSuggestedGift(props.ids, formData);
+      props.setChangeTable(true);
     } catch (e) {
       if (e.response.status === 422) {
+        props.setChangeTable(false);
         Object.keys(e.response.data).forEach((key) => {
           setError(key, {
             type: "manual",
@@ -73,6 +75,7 @@ const GiftAddSuggestion = (props) => {
   };
 
   const onCancel = () => {
+    props.setChangeTable(false);
     handleClose();
   };
 

@@ -50,20 +50,24 @@ function Reviews() {
   const [editMode, setEditMode] = useState(false);
   const [editReviewId, setEditReviewId] = useState(null);
   const commentInputRef = useRef(null);
-
   const location = useLocation();
   const [user, setUser] = useState(location.state ? location.state.user : null);
   const [good, setGood] = useState(location.state ? location.state.good : null);
   const [requestedGifts, setRequestedGifts] = useState(null);
   const [openAdd, setOpenAdd] = useState(false);
-  const [reviewIds, setreviewIds] = useState(null);
+  const [reviewIds, setReviewIds] = useState(null);
   const [openArrowIcon, setOpenArrowIcon] = useState([]);
+  const [suggestedGifts, setSuggestedGifts] = useState({});
 
   const handleOpenAdd = (reviewId) => {
     setOpenAdd(true);
-    setreviewIds({ ...id, review_id: `${reviewId}` });
+    setReviewIds({ ...id, review_id: `${reviewId}` });
   }
   const handleCloseAdd = (state) => { setOpenAdd(state) }
+
+  const handleChangeTable = (state) => {
+    if (state) loadSuggestedGifts(reviewIds.review_id);
+  }
 
   const {
     control,
@@ -208,7 +212,7 @@ function Reviews() {
           "id": `${reviewId}`
         }
         const data = await api.auth.deleteReview(allIds);
-        const response = await api.auth.getReviews(id);
+        const response = await api.auth.getReviews(id);             
         setReviews(response.data);
       }
     } catch (e) {
@@ -217,7 +221,6 @@ function Reviews() {
     } finally {
     }
   };
-
 
   const onDeleteSuggestedGift = async (reviewId, giftId) => {
     var result = window.confirm(`Would you like to delete the gift?`);
@@ -237,7 +240,6 @@ function Reviews() {
     } finally {
     }
   }
-
 
   const ids = (lastId) => {
     return {
@@ -273,7 +275,6 @@ function Reviews() {
     setEditReviewId(null);
   }
 
-  const [suggestedGifts, setSuggestedGifts] = useState({});
   const loadSuggestedGifts = useCallback(async (reviewId) => {
     try {
       const response = await api.auth.getSuggestedGifts(allIds(reviewId));
@@ -484,22 +485,20 @@ function Reviews() {
             >
               <TableRow >
                 <TableCell sx={{ width: "10%" }}>Grade</TableCell>
-                <TableCell sx={{ width: "40%" }}>Comment</TableCell>
+                <TableCell                      >Comment</TableCell>
                 <TableCell sx={{ width: "15%" }}>Author</TableCell>
-                <TableCell sx={{ width: "10%" }}>Changed</TableCell>
-                <TableCell sx={{ width: "11%" }}>Author's tools</TableCell>
-                <TableCell sx={{ width: "19%" }}>Suggested gifts </TableCell>
+                <TableCell sx={{ width: "7%" }}>Changed</TableCell>
+                <TableCell sx={{ width: "12%" }}>Author's tools</TableCell>
+                <TableCell sx={{ width: "14%" }}>Suggested gifts </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {reviews && reviews.map((review, index) =>
-                <>
+                <React.Fragment key={review.id}>
                   <TableRow
-                    key={review.id}
                     sx={{ height: 10 }}
                     sx={{ fontStyle: (editMode && editReviewId === review.id) ? 'italic' : undefined }}
                     selected={(editMode && editReviewId === review.id)}
-                  // sx={{ '& > *': { borderBottom: 'unset' } }}
                   >
                     <TableCell sx={{ padding: "16px 16px" }}>{review.grade}</TableCell>
                     <TableCell sx={{ padding: "16px 16px" }}>{getComment(review.comment)}</TableCell>
@@ -541,7 +540,7 @@ function Reviews() {
                         aria-label="expand row"
                         size="small"
                         onClick={() => {
-                          if ((openArrowIcon[index] === false)) loadSuggestedGifts(review.id);
+                          if ((!openArrowIcon[index]) && !(suggestedGifts[review.id])) loadSuggestedGifts(review.id);
                           setOpenArrowIcon(values => values.map((value, i) => i === index ? !value : value));
                         }}
                       >
@@ -566,14 +565,13 @@ function Reviews() {
                                 >
                                   <TableRow>
                                     <TableCell sx={{ width: "20%" }}>Name</TableCell>
-                                    <TableCell sx={{ width: "70%" }}>Description</TableCell>
-                                    <TableCell sx={{ width: "10%" }}>Picture</TableCell>
-                                    <TableCell sx={{ width: "10%" }}>Tools</TableCell>
-
+                                    <TableCell sx={{ width: "60%" }}>Description</TableCell>
+                                    <TableCell sx={{ width: "12%" }}>Picture</TableCell>
+                                    <TableCell sx={{ width: "8%" }}>Tools</TableCell>
                                   </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                  {(suggestedGifts[review.id] !== undefined) && suggestedGifts[review.id].map((suggestedGift) => (
+                                  {(suggestedGifts[review.id]) && suggestedGifts[review.id].map((suggestedGift) => (
                                     <TableRow
                                       key={suggestedGift.id}
                                     >
@@ -587,7 +585,6 @@ function Reviews() {
                                         sx={{ verticalAlign: 'top' }}>
                                         {suggestedGift.description
                                         }</TableCell>
-
                                       <TableCell>
                                         <ButtonBase sx={{ width: 96, height: 96 }}>
                                           {(suggestedGift.images[0] !== undefined) ?
@@ -596,7 +593,6 @@ function Reviews() {
                                           }
                                         </ButtonBase>
                                       </TableCell>
-
                                       <TableCell>
                                         <IconButton
                                           aria-label="delete"
@@ -609,13 +605,12 @@ function Reviews() {
                                         </IconButton>
                                       </TableCell>
                                     </TableRow>
-
                                   ))}
                                   {(review.user_id === auth.user.id) &&
                                     <TableRow>
                                       <TableCell > </TableCell>
-                                      <TableCell ></TableCell>
-                                      <TableCell align="right" >Add gift</TableCell>
+                                      <TableCell > </TableCell>
+                                      <TableCell align="right" >Add a gift</TableCell>
                                       <TableCell >
                                         <IconButton
                                           color="primary"
@@ -630,6 +625,14 @@ function Reviews() {
                                         </IconButton>
                                       </TableCell>
                                     </TableRow>}
+                                  {(suggestedGifts[review.id]) && (suggestedGifts[review.id].length === 0) &&
+                                    (review.user_id !== auth.user.id) &&
+                                    <TableRow>
+                                      <TableCell > </TableCell>
+                                      <TableCell align="center" >
+                                        there are no suggestions
+                                      </TableCell>
+                                    </TableRow>}
                                 </TableBody>
                               </Table>
                             </Box>
@@ -638,7 +641,7 @@ function Reviews() {
                       </Collapse>
                     </TableCell>
                   </TableRow>
-                </>
+                </React.Fragment>
               )}
             </TableBody>
           </Table>
@@ -646,6 +649,7 @@ function Reviews() {
       </Paper >
       <GiftAddSuggestion
         setStateModal={handleCloseAdd}
+        setChangeTable={handleChangeTable}
         stateOpen={openAdd}
         ids={reviewIds}
       />
