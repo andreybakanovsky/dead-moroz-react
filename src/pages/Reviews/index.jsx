@@ -40,6 +40,7 @@ import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
 import validationSchema from "./validation";
 import GiftAddSuggestion from "../GiftAddSuggestion";
+import GiftEditSuggestion from "../GiftEditSuggestion";
 
 function Reviews() {
   const id = useParams();
@@ -54,19 +55,31 @@ function Reviews() {
   const [user, setUser] = useState(location.state ? location.state.user : null);
   const [good, setGood] = useState(location.state ? location.state.good : null);
   const [requestedGifts, setRequestedGifts] = useState(null);
-  const [openAdd, setOpenAdd] = useState(false);
+  const [openModalAdd, setOpenModalAdd] = useState(false);
+  const [openModalEdit, setOpenModalEdit] = useState(false);
   const [reviewIds, setReviewIds] = useState(null);
   const [openArrowIcon, setOpenArrowIcon] = useState([]);
   const [suggestedGifts, setSuggestedGifts] = useState({});
+  const [editGiftIds, setEditGiftIds] = useState(null);
 
   const handleOpenAdd = (reviewId) => {
-    setOpenAdd(true);
+    setOpenModalAdd(true);
     setReviewIds({ ...id, review_id: `${reviewId}` });
   }
-  const handleCloseAdd = (state) => { setOpenAdd(state) }
+  const handleCloseModalAdd = (state) => { setOpenModalAdd(state) }
+  const handleCloseModalEdit = (state) => { setOpenModalEdit(state) }
 
-  const handleChangeTable = (state) => {
+  const handleChangeAdd = (state) => {
     if (state) loadSuggestedGifts(reviewIds.review_id);
+  }
+
+  const handleChangeEdit = (state) => {
+    if (state) loadSuggestedGifts(editGiftIds.review_id);
+  }
+
+  const handleOpenEdit = (reviewId, giftId) => {
+    setOpenModalEdit(true);
+    setEditGiftIds({ ...id, review_id: `${reviewId}`, id: `${giftId}` });
   }
 
   const {
@@ -212,7 +225,7 @@ function Reviews() {
           "id": `${reviewId}`
         }
         const data = await api.auth.deleteReview(allIds);
-        const response = await api.auth.getReviews(id);             
+        const response = await api.auth.getReviews(id);
         setReviews(response.data);
       }
     } catch (e) {
@@ -327,7 +340,6 @@ function Reviews() {
                   </Grid>
                 </Grid>
               </Grid>
-
               <Grid item>
                 <ButtonBase sx={{ width: 200, height: 128 }}>
                   <Img alt="complex" src={good.images[0].url} />
@@ -335,7 +347,6 @@ function Reviews() {
               </Grid>
             </Grid>
           </Grid>
-
           <Grid item xs={6}>
             <Typography gutterBottom variant="subtitle1" component="div">
               Requested gifts
@@ -367,7 +378,6 @@ function Reviews() {
           </Grid>
         </Grid>
       </Paper >
-
       <Paper
         sx={{
           p: 2,
@@ -565,9 +575,9 @@ function Reviews() {
                                 >
                                   <TableRow>
                                     <TableCell sx={{ width: "20%" }}>Name</TableCell>
-                                    <TableCell sx={{ width: "60%" }}>Description</TableCell>
-                                    <TableCell sx={{ width: "12%" }}>Picture</TableCell>
-                                    <TableCell sx={{ width: "8%" }}>Tools</TableCell>
+                                    <TableCell                      >Description</TableCell>
+                                    <TableCell sx={{ width: "13%" }}>Picture</TableCell>
+                                    <TableCell sx={{ width: "13%" }}>Tools</TableCell>
                                   </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -594,15 +604,24 @@ function Reviews() {
                                         </ButtonBase>
                                       </TableCell>
                                       <TableCell>
-                                        <IconButton
-                                          aria-label="delete"
-                                          onClick={() => onDeleteSuggestedGift(review.id, suggestedGift.id)}
-                                        >
-                                          {(review.user_id === auth.user.id) &&
-                                            <DeleteOutlineIcon
-                                              sx={{ color: 'darkgray', fontSize: 24 }}
-                                            />}
-                                        </IconButton>
+                                        {(review.user_id === auth.user.id) &&
+                                          <>
+                                            <IconButton aria-label="edit"
+                                              onClick={() => handleOpenEdit(review.id, suggestedGift.id)}
+                                            >
+                                              <EditIcon
+                                                sx={{ color: 'darkgray', fontSize: 24 }}
+                                              />
+                                            </IconButton>
+                                            <IconButton
+                                              aria-label="delete"
+                                              onClick={() => onDeleteSuggestedGift(review.id, suggestedGift.id)}
+                                            >
+                                              <DeleteOutlineIcon
+                                                sx={{ color: 'darkgray', fontSize: 24 }}
+                                              />
+                                            </IconButton>
+                                          </>}
                                       </TableCell>
                                     </TableRow>
                                   ))}
@@ -648,10 +667,16 @@ function Reviews() {
         </TableContainer>
       </Paper >
       <GiftAddSuggestion
-        setStateModal={handleCloseAdd}
-        setChangeTable={handleChangeTable}
-        stateOpen={openAdd}
+        setStateModal={handleCloseModalAdd}
+        setChangeTable={handleChangeAdd}
+        stateOpen={openModalAdd}
         ids={reviewIds}
+      />
+      <GiftEditSuggestion
+        setStateModal={handleCloseModalEdit}
+        setChangeTable={handleChangeEdit}
+        stateOpen={openModalEdit}
+        ids={editGiftIds}
       />
     </Container>
   );

@@ -24,17 +24,18 @@ const endpoints = {
   addGift: (id, data) => axios.post(`/v1/users/${id.user_id}/goods/${id.good_id}/gifts`, data),
   updateGift: (id, data) => axios.patch(`/v1/users/${id.user_id}/goods/${id.good_id}/gifts/${id.id}`, data),
   deleteRequestedGifts: (id) => axios.delete(`/v1/users/${id.user_id}/goods/${id.good_id}/gifts/${id.id}`),
-  
+
   getReviews: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews`),
   getReview: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.id}`),
   updateReview: (id, data) => axios.patch(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.id}`, data),
   addReview: (id, data) => axios.post(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews`, data),
   deleteReview: (id) => axios.delete(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.id}`),
-  
+
   getSuggestedGifts: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.review_id}/gifts`),
   getSuggestedGift: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.review_id}/gifts/${id.id}`),
   deleteSuggestedGift: (id) => axios.delete(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.review_id}/gifts/${id.id}`),
   addSuggestedGift: (id, data) => axios.post(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.review_id}/gifts`, data),
+  updateSuggestedGift: (id, data) => axios.patch(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.review_id}/gifts/${id.id}`, data),
 };
 
 export default endpoints;
