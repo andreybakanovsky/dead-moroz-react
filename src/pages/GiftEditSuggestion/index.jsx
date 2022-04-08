@@ -94,6 +94,7 @@ const GiftEditSuggestion = (props) => {
     for (let i = 0; i < files.length; i++) {
       chosenfiles.push(files[i]);
     }
+    setFilesCurrent(null);
     setFilesSuggested(chosenfiles);
   }
 
