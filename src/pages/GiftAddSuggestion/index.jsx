@@ -6,15 +6,10 @@ import {
   Button,
   TextField,
 } from "@mui/material";
-import {
-  useParams,
-  useNavigate,
-} from 'react-router-dom';
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import validationSchema from "./validation";
 import api from "../../services/api";
-import useAuth from "../../hooks/useAuth";
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
@@ -31,8 +26,7 @@ const style = {
   p: 4,
 };
 
-const AddGift = (props) => {
-  const id = useParams();
+const GiftAddSuggestion = (props) => {
   const handleClose = () => {
     props.setStateModal(false)
     setFilesSuggested(null);
@@ -47,12 +41,7 @@ const AddGift = (props) => {
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
-  const navigate = useNavigate();
-  const auth = useAuth();
 
-  const onGifts = () => {
-    navigate(`/users/${id.user_id}/goods/${id.good_id}/gifts`);
-  };
   const inputFile = useRef(null);
   const [filesSuggested, setFilesSuggested] = useState();
 
@@ -60,16 +49,18 @@ const AddGift = (props) => {
     const formData = new FormData();
 
     try {
-      formData.append('gift[name]', data.name);
-      formData.append('gift[description]', data.description);
+      formData.append('gift_suggestion[name]', data.name);
+      formData.append('gift_suggestion[description]', data.description);
       if (filesSuggested) {
         for (let i = 0; i < filesSuggested.length; i++) {
-          formData.append("gift[images][]", filesSuggested[i], filesSuggested[i].name)
+          formData.append("gift_suggestion[images][]", filesSuggested[i], filesSuggested[i].name)
         }
       }
-      await api.auth.addGift(id, formData);
+      await api.auth.addSuggestedGift(props.ids, formData);
+      props.setChangeTable(true);
     } catch (e) {
       if (e.response.status === 422) {
+        props.setChangeTable(false);
         Object.keys(e.response.data).forEach((key) => {
           setError(key, {
             type: "manual",
@@ -79,12 +70,12 @@ const AddGift = (props) => {
       }
     } finally {
       handleClose();
-      onGifts();
       reset();
     }
   };
 
   const onCancel = () => {
+    props.setChangeTable(false);
     handleClose();
   };
 
@@ -115,7 +106,7 @@ const AddGift = (props) => {
             component="h2"
             textAlign="center"
             sx={{ mb: '0.5rem' }}>
-            Requesting gift
+            Gift suggestion
           </Typography>
           <Controller
             name="name"
@@ -187,7 +178,6 @@ const AddGift = (props) => {
             startIcon={<AddAPhotoIcon />}
             onClick={openFileDialog}
           >
-
           </Button>
           <Button
             sx={{ m: '1rem' }}
@@ -203,4 +193,4 @@ const AddGift = (props) => {
   );
 }
 
-export default AddGift;
+export default GiftAddSuggestion;

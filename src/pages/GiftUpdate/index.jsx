@@ -211,8 +211,8 @@ const GiftUpdate = (props) => {
             style={{ display: 'none' }}
             type="file"
             multiple ref={inputFile}
-            name='image-uploader-1234556'
-            id="image-uploader-1234556"
+            name='image-uploader'
+            id="image-uploader"
             onInput={(e) => changeHandler(e)}
             accept="image/*"
             value=''

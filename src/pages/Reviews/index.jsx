@@ -16,11 +16,13 @@ import {
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import ButtonBase from '@mui/material/ButtonBase';
-import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffIcon from '@mui/icons-material/EditOff';
+import AddIcon from '@mui/icons-material/Add';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -31,11 +33,14 @@ import TableRow from '@mui/material/TableRow';
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Divider from '@mui/material/Divider';
-
+import Collapse from '@mui/material/Collapse';
+import Box from '@mui/material/Box';
 
 import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
 import validationSchema from "./validation";
+import GiftAddSuggestion from "../GiftAddSuggestion";
+import GiftEditSuggestion from "../GiftEditSuggestion";
 
 function Reviews() {
   const id = useParams();
@@ -46,11 +51,36 @@ function Reviews() {
   const [editMode, setEditMode] = useState(false);
   const [editReviewId, setEditReviewId] = useState(null);
   const commentInputRef = useRef(null);
-
   const location = useLocation();
   const [user, setUser] = useState(location.state ? location.state.user : null);
   const [good, setGood] = useState(location.state ? location.state.good : null);
   const [requestedGifts, setRequestedGifts] = useState(null);
+  const [openModalAdd, setOpenModalAdd] = useState(false);
+  const [openModalEdit, setOpenModalEdit] = useState(false);
+  const [reviewIds, setReviewIds] = useState(null);
+  const [openArrowIcon, setOpenArrowIcon] = useState([]);
+  const [suggestedGifts, setSuggestedGifts] = useState({});
+  const [editGiftIds, setEditGiftIds] = useState(null);
+
+  const handleOpenAdd = (reviewId) => {
+    setOpenModalAdd(true);
+    setReviewIds({ ...id, review_id: `${reviewId}` });
+  }
+  const handleCloseModalAdd = (state) => { setOpenModalAdd(state) }
+  const handleCloseModalEdit = (state) => { setOpenModalEdit(state) }
+
+  const handleChangeAdd = (state) => {
+    if (state) loadSuggestedGifts(reviewIds.review_id);
+  }
+
+  const handleChangeEdit = (state) => {
+    if (state) loadSuggestedGifts(editGiftIds.review_id);
+  }
+
+  const handleOpenEdit = (reviewId, giftId) => {
+    setOpenModalEdit(true);
+    setEditGiftIds({ ...id, review_id: `${reviewId}`, id: `${giftId}` });
+  }
 
   const {
     control,
@@ -113,12 +143,14 @@ function Reviews() {
     try {
       const response = await api.auth.getReviews(id);
       setReviews(response.data);
+      setOpenArrowIcon(Array(response.data.length).fill(false));
     } catch (e) {
       console.log(e.response.status);
       console.log(e.response.data);
       if (e.response.status === 404) {
         navigate("/not-found-404");
       }
+    } finally {
     }
   }, [id, navigate]);
 
@@ -203,10 +235,36 @@ function Reviews() {
     }
   };
 
+  const onDeleteSuggestedGift = async (reviewId, giftId) => {
+    var result = window.confirm(`Would you like to delete the gift?`);
+    try {
+      if (result) {
+        const allIds = {
+          ...id,
+          "review_id": `${reviewId}`,
+          "id": `${giftId}`
+        }
+        await api.auth.deleteSuggestedGift(allIds);
+        loadSuggestedGifts(reviewId);
+      }
+    } catch (e) {
+      console.log(e.response.status);
+      console.log(e.response.data);
+    } finally {
+    }
+  }
+
   const ids = (lastId) => {
     return {
       ...id,
       "id": `${lastId}`
+    }
+  }
+
+  const allIds = (lastId) => {
+    return {
+      ...id,
+      "review_id": `${lastId}`
     }
   }
 
@@ -229,6 +287,19 @@ function Reviews() {
     setEditMode(false);
     setEditReviewId(null);
   }
+
+  const loadSuggestedGifts = useCallback(async (reviewId) => {
+    try {
+      const response = await api.auth.getSuggestedGifts(allIds(reviewId));
+      setSuggestedGifts(prev => ({
+        ...prev,
+        [reviewId]: response.data
+      }));
+    } catch (e) {
+      console.log(e.response.status);
+      console.log(e.response.data);
+    }
+  }, []);
 
   return (
     <Container >
@@ -269,7 +340,6 @@ function Reviews() {
                   </Grid>
                 </Grid>
               </Grid>
-
               <Grid item>
                 <ButtonBase sx={{ width: 200, height: 128 }}>
                   <Img alt="complex" src={good.images[0].url} />
@@ -277,7 +347,6 @@ function Reviews() {
               </Grid>
             </Grid>
           </Grid>
-
           <Grid item xs={6}>
             <Typography gutterBottom variant="subtitle1" component="div">
               Requested gifts
@@ -309,7 +378,6 @@ function Reviews() {
           </Grid>
         </Grid>
       </Paper >
-
       <Paper
         sx={{
           p: 2,
@@ -427,70 +495,189 @@ function Reviews() {
             >
               <TableRow >
                 <TableCell sx={{ width: "10%" }}>Grade</TableCell>
-                <TableCell sx={{ width: "40%" }}>Comment</TableCell>
+                <TableCell                      >Comment</TableCell>
                 <TableCell sx={{ width: "15%" }}>Author</TableCell>
-                <TableCell sx={{ width: "10%" }}>Changed</TableCell>
-                <TableCell sx={{ width: "15%" }}>Tools</TableCell>
-                <TableCell sx={{ width: "10%" }}>Gifts</TableCell>
+                <TableCell sx={{ width: "7%" }}>Changed</TableCell>
+                <TableCell sx={{ width: "12%" }}>Author's tools</TableCell>
+                <TableCell sx={{ width: "14%" }}>Suggested gifts </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {reviews && reviews.map(review =>
-                <TableRow
-                  key={review.id}
-                  sx={{ height: 10 }}
-                  sx={{ fontStyle: (editMode && editReviewId === review.id) ? 'italic' : undefined }}
-                  selected={(editMode && editReviewId === review.id)}
-                >
-                  <TableCell sx={{ padding: "0px 16px" }}>{review.grade}</TableCell>
-                  <TableCell sx={{ padding: "0px 16px" }}>{getComment(review.comment)}</TableCell>
-                  <TableCell sx={{ padding: "0px 16px" }}>{getAuthor(review.comment)}</TableCell>
-                  <TableCell sx={{ padding: "0px 16px" }}>{getDate(review.updated_at)}</TableCell>
-                  <TableCell sx={{ padding: "0px 16px" }}>
-                    {(review.user_id === auth.user.id) &&
-                      <>
-                        {(editReviewId !== review.id) ?
-                          <IconButton aria-label="edit"
-                            onClick={() => onEditReview(review.id)}
-                          >
-                            <EditIcon
-                              sx={{ color: 'darkgray', fontSize: 24 }}
-                            />
-                          </IconButton>
-                          :
-                          <IconButton aria-label="cancel edit"
-                            onClick={() => OnCancel(review.id)}
-                          >
-                            <EditOffIcon
-                              sx={{ color: 'darkgray', fontSize: 24 }}
-                            />
-                          </IconButton>}
-                        {(!editMode) &&
-                          <IconButton
-                            aria-label="delete"
-                            onClick={() => onDelete(review.id)}
-                          >
-                            <DeleteOutlineIcon
-                              sx={{ color: 'darkgray', fontSize: 24 }}
-                            />
-                          </IconButton>}
-                      </>
-                    }
-                  </TableCell>
-                  <TableCell sx={{ padding: "0px 16px" }}>
-                    <IconButton aria-label="gift">
-                      <CardGiftcardIcon
-                        className="dead-moroz-green-color"
-                        sx={{ fontSize: 26 }}
-                      />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
+              {reviews && reviews.map((review, index) =>
+                <React.Fragment key={review.id}>
+                  <TableRow
+                    sx={{ height: 10 }}
+                    sx={{ fontStyle: (editMode && editReviewId === review.id) ? 'italic' : undefined }}
+                    selected={(editMode && editReviewId === review.id)}
+                  >
+                    <TableCell sx={{ padding: "16px 16px" }}>{review.grade}</TableCell>
+                    <TableCell sx={{ padding: "16px 16px" }}>{getComment(review.comment)}</TableCell>
+                    <TableCell sx={{ padding: "16px 16px" }}>{getAuthor(review.comment)}</TableCell>
+                    <TableCell sx={{ padding: "16px 16px" }}>{getDate(review.updated_at)}</TableCell>
+                    <TableCell sx={{ padding: "10px 16px" }}>
+                      {(review.user_id === auth.user.id) &&
+                        <>
+                          {(editReviewId !== review.id) ?
+                            <IconButton aria-label="edit"
+                              onClick={() => onEditReview(review.id)}
+                            >
+                              <EditIcon
+                                sx={{ color: 'darkgray', fontSize: 24 }}
+                              />
+                            </IconButton>
+                            :
+                            <IconButton aria-label="cancel edit"
+                              onClick={() => OnCancel(review.id)}
+                            >
+                              <EditOffIcon
+                                sx={{ color: 'darkgray', fontSize: 24 }}
+                              />
+                            </IconButton>}
+                          {(!editMode) &&
+                            <IconButton
+                              aria-label="delete"
+                              onClick={() => onDelete(review.id)}
+                            >
+                              <DeleteOutlineIcon
+                                sx={{ color: 'darkgray', fontSize: 24 }}
+                              />
+                            </IconButton>}
+                        </>
+                      }
+                    </TableCell>
+                    <TableCell sx={{ padding: "0px 16px" }}>
+                      <IconButton
+                        aria-label="expand row"
+                        size="small"
+                        onClick={() => {
+                          if ((!openArrowIcon[index]) && !(suggestedGifts[review.id])) loadSuggestedGifts(review.id);
+                          setOpenArrowIcon(values => values.map((value, i) => i === index ? !value : value));
+                        }}
+                      >
+                        {openArrowIcon[index] ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                      <Collapse in={openArrowIcon[index]} timeout="auto" unmountOnExit>
+                        <Grid container spacing={2} sx={{ mt: 0.3, mb: 1 }}>
+                          <Grid item xs={1.7}>
+                            <Typography sx={{ margin: 0 }} gutterBottom variant="subtitle1" component="div">
+                              Suggested gifts:
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={10}>
+                            <Box sx={{ margin: 0 }}>
+                              <Table size="small" aria-label="purchases">
+                                <TableHead
+                                  sx={{ backgroundColor: "#f5f0f0" }}
+                                >
+                                  <TableRow>
+                                    <TableCell sx={{ width: "20%" }}>Name</TableCell>
+                                    <TableCell                      >Description</TableCell>
+                                    <TableCell sx={{ width: "13%" }}>Picture</TableCell>
+                                    <TableCell sx={{ width: "13%" }}>Tools</TableCell>
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {(suggestedGifts[review.id]) && suggestedGifts[review.id].map((suggestedGift) => (
+                                    <TableRow
+                                      key={suggestedGift.id}
+                                    >
+                                      <TableCell
+                                        sx={{ verticalAlign: 'top' }}
+                                        component="th"
+                                        scope="row">
+                                        {suggestedGift.name}
+                                      </TableCell>
+                                      <TableCell
+                                        sx={{ verticalAlign: 'top' }}>
+                                        {suggestedGift.description
+                                        }</TableCell>
+                                      <TableCell>
+                                        <ButtonBase sx={{ width: 96, height: 96 }}>
+                                          {(suggestedGift.images[0] !== undefined) ?
+                                            <Img alt="" src={suggestedGift.images[0].url} />
+                                            : null
+                                          }
+                                        </ButtonBase>
+                                      </TableCell>
+                                      <TableCell>
+                                        {(review.user_id === auth.user.id) &&
+                                          <>
+                                            <IconButton aria-label="edit"
+                                              onClick={() => handleOpenEdit(review.id, suggestedGift.id)}
+                                            >
+                                              <EditIcon
+                                                sx={{ color: 'darkgray', fontSize: 24 }}
+                                              />
+                                            </IconButton>
+                                            <IconButton
+                                              aria-label="delete"
+                                              onClick={() => onDeleteSuggestedGift(review.id, suggestedGift.id)}
+                                            >
+                                              <DeleteOutlineIcon
+                                                sx={{ color: 'darkgray', fontSize: 24 }}
+                                              />
+                                            </IconButton>
+                                          </>}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                  {(review.user_id === auth.user.id) &&
+                                    <TableRow>
+                                      <TableCell > </TableCell>
+                                      <TableCell > </TableCell>
+                                      <TableCell align="right" >Add a gift</TableCell>
+                                      <TableCell >
+                                        <IconButton
+                                          color="primary"
+                                          aria-label="upload picture"
+                                          component="span"
+                                          onClick={() => handleOpenAdd(review.id)}
+                                        >
+                                          <AddIcon
+                                            className="dead-moroz-red-color"
+                                            sx={{ fontSize: 24 }}
+                                          />
+                                        </IconButton>
+                                      </TableCell>
+                                    </TableRow>}
+                                  {(suggestedGifts[review.id]) && (suggestedGifts[review.id].length === 0) &&
+                                    (review.user_id !== auth.user.id) &&
+                                    <TableRow>
+                                      <TableCell > </TableCell>
+                                      <TableCell align="center" >
+                                        there are no suggestions
+                                      </TableCell>
+                                    </TableRow>}
+                                </TableBody>
+                              </Table>
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      </Collapse>
+                    </TableCell>
+                  </TableRow>
+                </React.Fragment>
               )}
             </TableBody>
           </Table>
         </TableContainer>
       </Paper >
+      <GiftAddSuggestion
+        setStateModal={handleCloseModalAdd}
+        setChangeTable={handleChangeAdd}
+        stateOpen={openModalAdd}
+        ids={reviewIds}
+      />
+      <GiftEditSuggestion
+        setStateModal={handleCloseModalEdit}
+        setChangeTable={handleChangeEdit}
+        stateOpen={openModalEdit}
+        ids={editGiftIds}
+      />
     </Container>
   );
 }

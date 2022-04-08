@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import {
@@ -6,15 +6,10 @@ import {
   Button,
   TextField,
 } from "@mui/material";
-import {
-  useParams,
-  useNavigate,
-} from 'react-router-dom';
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import validationSchema from "./validation";
 import api from "../../services/api";
-import useAuth from "../../hooks/useAuth";
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
@@ -31,12 +26,19 @@ const style = {
   p: 4,
 };
 
-const AddGift = (props) => {
-  const id = useParams();
+const GiftEditSuggestion = (props) => {
+  const inputFile = useRef(null);
+  const [filesSuggested, setFilesSuggested] = useState(null);
+  const [filesCurrent, setFilesCurrent] = useState(null);
+
   const handleClose = () => {
     props.setStateModal(false)
     setFilesSuggested(null);
-    reset();
+    setFilesCurrent(null);
+    reset({
+      name: '',
+      description: ''
+    });
   }
   const {
     control,
@@ -47,29 +49,23 @@ const AddGift = (props) => {
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
-  const navigate = useNavigate();
-  const auth = useAuth();
-
-  const onGifts = () => {
-    navigate(`/users/${id.user_id}/goods/${id.good_id}/gifts`);
-  };
-  const inputFile = useRef(null);
-  const [filesSuggested, setFilesSuggested] = useState();
 
   const onSubmit = async (data) => {
     const formData = new FormData();
 
     try {
-      formData.append('gift[name]', data.name);
-      formData.append('gift[description]', data.description);
+      formData.append('gift_suggestion[name]', data.name);
+      formData.append('gift_suggestion[description]', data.description);
       if (filesSuggested) {
         for (let i = 0; i < filesSuggested.length; i++) {
-          formData.append("gift[images][]", filesSuggested[i], filesSuggested[i].name)
+          formData.append("gift_suggestion[images][]", filesSuggested[i], filesSuggested[i].name)
         }
       }
-      await api.auth.addGift(id, formData);
+      await api.auth.updateSuggestedGift(props.ids, formData);
+      props.setChangeTable(true);
     } catch (e) {
       if (e.response.status === 422) {
+        props.setChangeTable(false);
         Object.keys(e.response.data).forEach((key) => {
           setError(key, {
             type: "manual",
@@ -79,12 +75,12 @@ const AddGift = (props) => {
       }
     } finally {
       handleClose();
-      onGifts();
       reset();
     }
   };
 
   const onCancel = () => {
+    props.setChangeTable(false);
     handleClose();
   };
 
@@ -98,8 +94,23 @@ const AddGift = (props) => {
     for (let i = 0; i < files.length; i++) {
       chosenfiles.push(files[i]);
     }
+    setFilesCurrent(null);
     setFilesSuggested(chosenfiles);
   }
+
+  const loadData = useCallback(async (ids) => {
+    if (ids === null) return;
+    const { data } = await api.auth.getSuggestedGift(ids);
+    setFilesCurrent(data.images);
+    reset({
+      name: data.name,
+      description: data.description
+    });
+  }, [reset]);
+
+  useEffect(() => {
+    loadData(props.ids);
+  }, [props.ids]);
 
   return (
     <Modal
@@ -115,7 +126,7 @@ const AddGift = (props) => {
             component="h2"
             textAlign="center"
             sx={{ mb: '0.5rem' }}>
-            Requesting gift
+            Edit the gift
           </Typography>
           <Controller
             name="name"
@@ -150,20 +161,32 @@ const AddGift = (props) => {
               />
             )}
           />
-          {(filesSuggested) ? (
-            < ImageList sx={{ width: "auto", height: 220 }} rowHeight={200} variant="masonry">
-              {filesSuggested && filesSuggested.map((file, i) => {
-                return (
-                  <ImageListItem key={i}>
-                    <img
-                      src={URL.createObjectURL(file)}
-                      srcSet={URL.createObjectURL(file)}
-                      alt={"photo... "}
-                      loading="lazy"
-                    />
-                  </ImageListItem>)
-              })}
-            </ImageList>) : null}
+          < ImageList sx={{ width: "auto", height: 220 }} rowHeight={200} variant="masonry">
+
+            {filesCurrent && filesCurrent.map((file, i) => {
+              return (
+                <ImageListItem key={i}>
+                  <img
+                    src={file.url}
+                    srcSet={file.url}
+                    alt={"photo... "}
+                    loading="lazy"
+                  />
+                </ImageListItem>)
+            })}
+
+            {filesSuggested && filesSuggested.map((file, i) => {
+              return (
+                <ImageListItem key={-i}>
+                  <img
+                    src={URL.createObjectURL(file)}
+                    srcSet={URL.createObjectURL(file)}
+                    alt={"photo... "}
+                    loading="lazy"
+                  />
+                </ImageListItem>)
+            })}
+          </ImageList>
           <Button
             sx={{ m: '1rem' }}
             variant="contained"
@@ -187,7 +210,6 @@ const AddGift = (props) => {
             startIcon={<AddAPhotoIcon />}
             onClick={openFileDialog}
           >
-
           </Button>
           <Button
             sx={{ m: '1rem' }}
@@ -195,7 +217,7 @@ const AddGift = (props) => {
             color="primary"
             type="submit"
           >
-            Add
+            Update
           </Button>
         </Box>
       </form>
@@ -203,4 +225,4 @@ const AddGift = (props) => {
   );
 }
 
-export default AddGift;
+export default GiftEditSuggestion;
