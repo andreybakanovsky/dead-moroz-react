@@ -23,6 +23,7 @@ import EditOffIcon from '@mui/icons-material/EditOff';
 import AddIcon from '@mui/icons-material/Add';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import TranslateIcon from '@mui/icons-material/Translate';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -54,6 +55,7 @@ function Reviews() {
   const location = useLocation();
   const [user, setUser] = useState(location.state ? location.state.user : null);
   const [good, setGood] = useState(location.state ? location.state.good : null);
+  const [goodTranslated, setGoodTranslated] = useState(null);
   const [requestedGifts, setRequestedGifts] = useState(null);
   const [openModalAdd, setOpenModalAdd] = useState(false);
   const [openModalEdit, setOpenModalEdit] = useState(false);
@@ -61,6 +63,7 @@ function Reviews() {
   const [openArrowIcon, setOpenArrowIcon] = useState([]);
   const [suggestedGifts, setSuggestedGifts] = useState({});
   const [editGiftIds, setEditGiftIds] = useState(null);
+  const [translateGood, setTranslateGood] = useState(false);
 
   const handleOpenAdd = (reviewId) => {
     setOpenModalAdd(true);
@@ -301,6 +304,23 @@ function Reviews() {
     }
   }, []);
 
+  const getTranslateGood = useCallback(async () => {
+    if ((!translateGood) && (goodTranslated === null)) {
+      try {
+        const response = await api.auth.getGoodTranslate(id);
+        setGoodTranslated(response.data);
+        setTranslateGood(true);
+      } catch (e) {
+        setTranslateGood(false);
+        console.log(e.response.status)
+        console.log(e.response.data)
+      }
+    }
+    else {
+      setTranslateGood(!translateGood);
+    }
+  }, [translateGood]);
+
   return (
     <Container >
       <Grid
@@ -326,16 +346,26 @@ function Reviews() {
       >
         <Grid container spacing={2}>
           <Grid item xs={6}>
-            <Typography gutterBottom variant="subtitle1" component="div">
+            <Typography gutterBottom variant="subtitle1" component="div" sx={{ display: 'inline-block', flexGrow: 1 }} >
               Good
             </Typography>
+            <IconButton
+              color="primary"
+              aria-label="magic"
+              component="span"
+              onClick={getTranslateGood}
+            >
+              <TranslateIcon
+                sx={{ transform: (translateGood) ? "scaleX(-1)" : undefined }}
+              />
+            </IconButton>
             <Divider sx={{ mb: 2 }} />
             <Grid container spacing={2}>
               <Grid item xs={12} sm container>
                 <Grid item xs container direction="column" spacing={2}>
                   <Grid item xs>
                     <Typography variant="body2" gutterBottom>
-                      {good.content}
+                      {(!translateGood) ? good.content : goodTranslated.content}
                     </Typography>
                   </Grid>
                 </Grid>
