@@ -18,12 +18,14 @@ const endpoints = {
   getGood: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}`),
   updateGood: (id, data) => axios.patch(`/v1/users/${id.user_id}/goods/${id.good_id}`, data),
   deleteGood: (id) => axios.delete(`/v1/users/${id.user_id}/goods/${id.good_id}`),
+  getGoodTranslate: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/translate`),
 
   getRequestedGifts: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/gifts`),
   getRequestedGift: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/gifts/${id.id}`),
   addGift: (id, data) => axios.post(`/v1/users/${id.user_id}/goods/${id.good_id}/gifts`, data),
   updateGift: (id, data) => axios.patch(`/v1/users/${id.user_id}/goods/${id.good_id}/gifts/${id.id}`, data),
   deleteRequestedGifts: (id) => axios.delete(`/v1/users/${id.user_id}/goods/${id.good_id}/gifts/${id.id}`),
+  getGiftsTranslate: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/gifts/translate`),
 
   getReviews: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews`),
   getReview: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.id}`),
