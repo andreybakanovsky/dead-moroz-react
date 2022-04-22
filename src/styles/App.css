@@ -1,13 +1,21 @@
 @import url("https://fonts.googleapis.com/css2?family=Source+Code+Pro&family=Source+Sans+Pro&display=swap");
 
 * {
-    font-family: "Source Sans Pro", sans-serif;
+  font-family: "Source Sans Pro", sans-serif;
 }
 
 .dead-moroz-red-color {
-  color: rgb(204, 22, 22);
+  color: #cc1616;
 }
 
 .dead-moroz-green-color {
   color: rgb(44, 134, 16);
+}
+
+.dead-moroz-blue-color {
+  color: #166bcc;
+}
+
+.dead-moroz-grey-color {
+  color: #b1aeae;
 }
