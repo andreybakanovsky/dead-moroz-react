@@ -8,6 +8,9 @@ const endpoints = {
 
   getUsers: () => axios.get("/v1/users"),
   getUser: (id) => axios.get(`/v1/users/${id.user_id}`),
+  getUserAvarageGrade:(id) => axios.get(`/v1/users/${id.user_id}/get_average`),
+  getUserYears:(id) => axios.get(`/v1/users/${id.user_id}/get_years`),
+  getSuggestedGiftsForYear:(id, year) => axios.get(`/v1/users/${id.user_id}/suggested_gifts/${year}`),
 
   // getKarmas: () => axios.get(`/v1/users/${id.user_id}/karmas/${id.id}`),
   // getInvitations: () => axios.get(`/v1/users/${id.user_id}/invitations`),
@@ -38,6 +41,7 @@ const endpoints = {
   deleteSuggestedGift: (id) => axios.delete(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.review_id}/gifts/${id.id}`),
   addSuggestedGift: (id, data) => axios.post(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.review_id}/gifts`, data),
   updateSuggestedGift: (id, data) => axios.patch(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.review_id}/gifts/${id.id}`, data),
+  updateDeadChoice: (id) => axios.patch(`/v1/gifts/${id}`),
 };
 
 export default endpoints;
