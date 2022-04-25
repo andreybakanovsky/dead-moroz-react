@@ -8,8 +8,8 @@ const endpoints = {
 
   getUsers: () => axios.get("/v1/users"),
   getUser: (id) => axios.get(`/v1/users/${id.user_id}`),
-  getUserAvarageGrade:(id) => axios.get(`/v1/users/${id.user_id}/get_average`),
-  getUserYears:(id) => axios.get(`/v1/users/${id.user_id}/get_years`),
+  getUserAvarageGrade:(id) => axios.get(`/v1/users/${id.user_id}/average_grade`),
+  getUserYears:(id) => axios.get(`/v1/users/${id.user_id}/good_years`),
   getSuggestedGiftsForYear:(id, year) => axios.get(`/v1/users/${id.user_id}/suggested_gifts/${year}`),
 
   // getKarmas: () => axios.get(`/v1/users/${id.user_id}/karmas/${id.id}`),
