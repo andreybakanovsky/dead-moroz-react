@@ -43,7 +43,7 @@ const endpoints = {
   deleteSuggestedGift: (id) => axios.delete(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.review_id}/gifts/${id.id}`),
   addSuggestedGift: (id, data) => axios.post(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.review_id}/gifts`, data),
   updateSuggestedGift: (id, data) => axios.patch(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.review_id}/gifts/${id.id}`, data),
-  updateDeadChoice: (id) => axios.patch(`/v1/gifts/${id}`),
+  updateDeadChoice: (id, data) => axios.patch(`/v1/gifts/${id}`, data),
 };
 
 export default endpoints;

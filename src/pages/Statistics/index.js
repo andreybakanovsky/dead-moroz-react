@@ -136,8 +136,11 @@ function Statistics() {
   });
 
   const makeChoice = async (currentGift) => {
+    const data = {
+      "deads_choice": !currentGift.deads_choice
+    }
     try {
-      const response = await api.auth.updateDeadChoice(currentGift.id);
+      const response = await api.auth.updateDeadChoice(currentGift.id, data);
       let updateSuggestedGift = suggestedGifts.map(gift => {
         if (gift.id == currentGift.id) {
           return { ...gift, deads_choice: response.data }
