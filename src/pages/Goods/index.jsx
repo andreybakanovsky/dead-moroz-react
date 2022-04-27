@@ -143,7 +143,7 @@ function Goods() {
                     sx={{ fontSize: 26 }}
                   />
                 </IconButton>
-                {(auth.user.role === "elf") &&
+                {((auth.user.role === "elf") || (auth.user.role === "dead_moroz")) &&
                   <IconButton aria-label="gift"
                     component={Link} to={`/users/${id.user_id}/goods/${good.id}/reviews`}
                     state={{ user, good }}

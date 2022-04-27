@@ -32,6 +32,8 @@ import Review from "../../pages/Review";
 import SuggestedGifts from "../../pages/SuggestedGifts";
 import SuggestedGift from "../../pages/SuggestedGift";
 
+import Statistics from "../../pages/Statistics";
+
 function AppRoutes() {
   const auth = useAuth();
 
@@ -63,6 +65,10 @@ function AppRoutes() {
         <Route
           path=":user_id/goods"
           element={<PrivateRoute> <Goods /> </PrivateRoute>}
+        />
+        <Route
+          path=":user_id/statistics"
+          element={<PrivateRoute> <Statistics /> </PrivateRoute>}
         />
         <Route
           path=":user_id/goods/:good_id"

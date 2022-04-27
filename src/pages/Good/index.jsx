@@ -55,10 +55,11 @@ function Good() {
 
       formData.append('good[year]', data.year);
       formData.append('good[content]', data.content);
-      for (let i = 0; i < filesSuggested.length; i++) {
-        formData.append("good[images][]", filesSuggested[i], filesSuggested[i].name)
+      if (filesSuggested) {
+        for (let i = 0; i < filesSuggested.length; i++) {
+          formData.append("good[images][]", filesSuggested[i], filesSuggested[i].name)
+        }
       }
-
       setMessageSnackbar("The Good update successfully")
       await api.auth.updateGood(id, formData);
       setIsOpen(true);
