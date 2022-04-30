@@ -18,6 +18,7 @@ import Home from "../../pages/Home";
 import Login from "../../pages/Login";
 import Signup from "../../pages/Signup";
 import Profile from "../../pages/Profile";
+import Karma from "../../pages/Karma";
 import NotFound from "../../pages/NotFound";
 
 import Users from "../../pages/Users";
@@ -51,6 +52,10 @@ function AppRoutes() {
       <Route
         path="/profile"
         element={<PrivateRoute> <Profile /> </PrivateRoute>}
+      />
+      <Route
+        path="/karma"
+        element={<PrivateRoute> <Karma /> </PrivateRoute>}
       />
 
       <Route path="users">
