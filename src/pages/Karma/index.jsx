@@ -5,16 +5,27 @@ import {
   Grid,
   Typography,
   Divider,
+  Button,
 } from "@mui/material";
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
-
+import { styled } from '@mui/material/styles';
 import {
   useLocation,
 } from 'react-router-dom';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+
+import useAuth from "../../hooks/useAuth";
+import api from "../../services/api";
 
 function Karma() {
   const location = useLocation();
-  const [karma, setKarma] = useState(location.state);
+  const [karma] = useState(location.state);
+  const [approvedGifts, setApprovedGifts] = useState(null);
+  const auth = useAuth();
 
   const getRatingGifts = (count) => {
     let rating = [];
@@ -29,6 +40,23 @@ function Karma() {
     }
     return rating;
   };
+
+  const loadApprovedGifts = async () => {
+    try {
+      const response = await api.auth.getApprovedGifts(auth.user.id);
+      setApprovedGifts(response.data);
+    } catch (e) {
+      console.log(e.response.status);
+      console.log(e.response.data);
+    }
+  };
+
+  const Img = styled('img')({
+    margin: 'auto',
+    display: 'block',
+    maxWidth: '100%',
+    maxHeight: '100%',
+  });
 
   return (
     <Container >
@@ -69,11 +97,76 @@ function Karma() {
           flexGrow: 1
         }}
       >
-        <Typography gutterBottom variant="subtitle1" component="div">
-          List approved gifts
-        </Typography>
-        <Divider sx={{ mb: 1 }} />
+        <Button
+          variant="outlined"
+          onClick={() => loadApprovedGifts()}
+        >
+          Show approved gifts
+        </Button>
       </Paper>
+      {approvedGifts &&
+        <Paper
+          sx={{
+            m: 4,
+            p: 2,
+            margin: 1,
+            maxWidth: 'auto',
+            flexGrow: 1
+          }}
+        >
+          <Typography gutterBottom variant="subtitle1" component="div">
+            List of approved gifts
+          </Typography>
+          <Divider sx={{ mb: 1 }} />
+          <Table size="small" aria-label="approvedGifts">
+            <TableHead
+              sx={{ backgroundColor: "#f5f0f0" }}
+            >
+              <TableRow>
+                <TableCell sx={{ width: "20%" }}>Year</TableCell>
+                <TableCell                      >Kid's name</TableCell>
+                <TableCell                      >Gift's name</TableCell>
+                <TableCell sx={{ width: "40%" }}>Description</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {approvedGifts && approvedGifts.map((approvedGift, i) => (
+                <TableRow
+                  key={approvedGift.gift_id}
+                >
+                  <TableCell
+                    sx={{ verticalAlign: 'top' }}
+                    component="th"
+                    scope="row">
+                    {approvedGift.year}
+                  </TableCell>
+                  <TableCell
+                    sx={{ verticalAlign: 'top' }}>
+                    {approvedGift.user_name}
+                  </TableCell>
+                  <TableCell
+                    sx={{ verticalAlign: 'top' }}>
+                    {approvedGift.gift_name}
+                  </TableCell>
+                  <TableCell
+                    sx={{ verticalAlign: 'top' }}>
+                    {approvedGift.description}
+                  </TableCell>
+                </TableRow>
+              ))}
+              {approvedGifts && (approvedGifts.length === 0) &&
+                <TableRow>
+                  <TableCell align="left" >
+                    there are no approved gifts
+                  </TableCell>
+                  <TableCell > </TableCell>
+                  <TableCell > </TableCell>
+                  <TableCell > </TableCell>
+                </TableRow>
+              }
+            </TableBody>
+          </Table>
+        </Paper>}
     </Container>
   );
 }
