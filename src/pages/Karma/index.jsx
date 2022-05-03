@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Paper,
@@ -17,13 +17,14 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import ButtonBase from '@mui/material/ButtonBase';
 
 import useAuth from "../../hooks/useAuth";
 import api from "../../services/api";
 
 function Karma() {
   const location = useLocation();
-  const [karma] = useState(location.state);
+  const [karma, setKarma] = useState(location.state);
   const [approvedGifts, setApprovedGifts] = useState(null);
   const auth = useAuth();
 
@@ -42,12 +43,17 @@ function Karma() {
   };
 
   const loadApprovedGifts = async () => {
-    try {
-      const response = await api.auth.getApprovedGifts(auth.user.id);
-      setApprovedGifts(response.data);
-    } catch (e) {
-      console.log(e.response.status);
-      console.log(e.response.data);
+    if (approvedGifts == null) {
+      try {
+        const response = await api.auth.getApprovedGifts(auth.user.id);
+        setApprovedGifts(response.data);
+      } catch (e) {
+        console.log(e.response.status);
+        console.log(e.response.data);
+      }
+    }
+    else {
+      setApprovedGifts(null);
     }
   };
 
@@ -57,6 +63,22 @@ function Karma() {
     maxWidth: '100%',
     maxHeight: '100%',
   });
+
+  const loadKarma = useCallback(async () => {
+    if (auth.user !== null && auth.user.role === 'elf') {
+      try {
+        const response = await api.auth.getKarma(auth.user.id);
+        setKarma(response.data);
+      } catch (e) {
+        console.log(e.response.status);
+        console.log(e.response.data);
+      }
+    }
+  }, [auth.user]);
+
+  useEffect(() => {
+    loadKarma();
+  }, [auth.user]);
 
   return (
     <Container >
@@ -101,7 +123,7 @@ function Karma() {
           variant="outlined"
           onClick={() => loadApprovedGifts()}
         >
-          Show approved gifts
+          {(approvedGifts == null) ? 'Show approved gifts' : 'Hide approved gifts'}
         </Button>
       </Paper>
       {approvedGifts &&
@@ -123,16 +145,17 @@ function Karma() {
               sx={{ backgroundColor: "#f5f0f0" }}
             >
               <TableRow>
-                <TableCell sx={{ width: "20%" }}>Year</TableCell>
-                <TableCell                      >Kid's name</TableCell>
-                <TableCell                      >Gift's name</TableCell>
-                <TableCell sx={{ width: "40%" }}>Description</TableCell>
+                <TableCell sx={{ width: "10%" }}>Year</TableCell>
+                <TableCell sx={{ width: "10%" }}>Kid's name</TableCell>
+                <TableCell sx={{ width: "20%" }}>Gift's name</TableCell>
+                <TableCell >Description</TableCell>
+                <TableCell sx={{ width: "10%" }} >Picture</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {approvedGifts && approvedGifts.map((approvedGift, i) => (
                 <TableRow
-                  key={approvedGift.gift_id}
+                  key={approvedGift.id}
                 >
                   <TableCell
                     sx={{ verticalAlign: 'top' }}
@@ -142,25 +165,34 @@ function Karma() {
                   </TableCell>
                   <TableCell
                     sx={{ verticalAlign: 'top' }}>
-                    {approvedGift.user_name}
+                    {approvedGift.users_name}
                   </TableCell>
                   <TableCell
                     sx={{ verticalAlign: 'top' }}>
-                    {approvedGift.gift_name}
+                    {approvedGift.gifts_name}
                   </TableCell>
                   <TableCell
                     sx={{ verticalAlign: 'top' }}>
                     {approvedGift.description}
                   </TableCell>
+                  <TableCell
+                    sx={{ verticalAlign: 'top' }}>
+                    <ButtonBase sx={{ width: 96, height: 96 }}>
+                      {(approvedGift.images[0] !== undefined) ?
+                        <Img alt="" src={approvedGift.images[0].url} />
+                        : null
+                      }
+                    </ButtonBase>
+                  </TableCell>
                 </TableRow>
               ))}
               {approvedGifts && (approvedGifts.length === 0) &&
                 <TableRow>
+                  <TableCell > </TableCell>
+                  <TableCell > </TableCell>
                   <TableCell align="left" >
                     there are no approved gifts
                   </TableCell>
-                  <TableCell > </TableCell>
-                  <TableCell > </TableCell>
                   <TableCell > </TableCell>
                 </TableRow>
               }
