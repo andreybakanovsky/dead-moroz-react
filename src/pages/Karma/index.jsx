@@ -30,6 +30,7 @@ function Karma() {
 
   const getRatingGifts = (count) => {
     let rating = [];
+    if (count > 46) { count = 46 }
     for (let i = 0; i < count; i++) {
       rating.push(
         <CardGiftcardIcon
