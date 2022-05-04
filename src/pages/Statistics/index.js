@@ -6,6 +6,8 @@ import {
   Avatar,
   IconButton,
   Paper,
+  Snackbar,
+  SnackbarContent,
 } from "@mui/material";
 
 import { useCallback, useEffect, useState } from "react";
@@ -41,6 +43,7 @@ function Statistics() {
   const [suggestedGifts, setSuggestedGifts] = useState();
   const [requestedGifts, setRequestedGifts] = useState();
   const [reviews, setReviews] = useState();
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleChange = (event, newYear) => {
     if (newYear !== null)
@@ -148,6 +151,7 @@ function Statistics() {
         return gift;
       });
       setSuggestedGifts(updateSuggestedGift);
+      if (response.data == true) setIsOpen(true);
     } catch (e) {
       console.log(e.response.status)
       console.log(e.response.data)
@@ -422,6 +426,16 @@ function Statistics() {
           </TableBody>
         </Table>
       </Paper>
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        open={isOpen}
+        autoHideDuration={6000}
+        onClose={() => setIsOpen(false)}
+      >
+        <SnackbarContent
+          message="+1 to the elf's karma"
+        />
+      </Snackbar>
     </Container>
   );
 }

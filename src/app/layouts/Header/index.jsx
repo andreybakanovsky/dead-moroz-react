@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   AppBar,
   IconButton,
@@ -12,15 +12,20 @@ import {
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Link, useNavigate } from 'react-router-dom';
-import useAuth from "../../../hooks/useAuth";
-import AddGood from "../../../pages/AddGood";
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import Avatar from '@mui/material/Avatar';
+import Badge from '@mui/material/Badge';
+import { styled } from '@mui/material/styles';
+import StarIcon from '@mui/icons-material/Star';
+
+import useAuth from "../../../hooks/useAuth";
+import AddGood from "../../../pages/AddGood";
+import api from "../../../services/api";
 
 const Header = () => {
-
   const auth = useAuth();
   const navigate = useNavigate();
+  const [karma, setKarma] = useState(null);
 
   const onLogOut = () => {
     auth.logOut();
@@ -30,6 +35,31 @@ const Header = () => {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = (state) => setOpen(state);
+
+  const loadKarma = useCallback(async () => {
+    if (auth.user !== null && auth.user.role === 'elf') {
+      try {
+        const response = await api.auth.getKarma(auth.user.id);
+        setKarma(response.data);
+      } catch (e) {
+        console.log(e.response.status);
+        console.log(e.response.data);
+      }
+    }
+  }, [auth.user]);
+
+  useEffect(() => {
+    loadKarma();
+  }, [auth.user]);
+
+  const StyledBadge = styled(Badge)(({ theme }) => ({
+    '& .MuiBadge-badge': {
+      right: 5,
+      top: 32,
+      border: `2px solid ${theme.palette.background.paper}`,
+      padding: '0 4px',
+    },
+  }));
 
   return (
     <React.Fragment>
@@ -69,14 +99,27 @@ const Header = () => {
                     >
                       Add good
                     </Button>}
+                  {(auth.user.role === 'elf' && karma) &&
+                    <StyledBadge
+                      badgeContent={(karma != null) ? karma.value : 0}
+                      color="success">
+                      <IconButton
+                        edge="start"
+                        color='inherit'
+                        component={Link} to={"/karma"} state={karma}
+                      >
+                        <StarIcon fontSize="large" />
+                      </IconButton>
+                    </StyledBadge>
+                  }
                   <Button
                     color="inherit"
                     component={Link} to="/profile"
                   >
-                    <Avatar 
-                    alt="Remy Sharp"
-                    src={auth.user.avatar}
-                    sx={{ ml: 1,  mr: 1 }}
+                    <Avatar
+                      alt={auth.user.name}
+                      src={auth.user.avatar}
+                      sx={{ ml: 1, mr: 1 }}
                     />
                     {auth.user.name}
                   </Button>

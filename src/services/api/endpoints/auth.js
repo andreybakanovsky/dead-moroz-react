@@ -14,7 +14,8 @@ const endpoints = {
   getRequestedGiftsForYear:(id, year) => axios.get(`/v1/users/${id.user_id}/requested_gifts/${year}`),
   getReviewsForYear:(id, year) => axios.get(`/v1/users/${id.user_id}/reviews/${year}`),
 
-  // getKarmas: () => axios.get(`/v1/users/${id.user_id}/karmas/${id.id}`),
+  getKarma: (id) => axios.get(`/v1/users/${id}/karma`),
+  getApprovedGifts: (id) => axios.get(`/v1/users/${id}/karma/approved_gifts`),
   // getInvitations: () => axios.get(`/v1/users/${id.user_id}/invitations`),
   // getInvitation: () => axios.get(`/v1/users/${id.user_id}/invitation/${id.id}`),
 
