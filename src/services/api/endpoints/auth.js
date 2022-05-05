@@ -16,8 +16,7 @@ const endpoints = {
 
   getKarma: (id) => axios.get(`/v1/users/${id}/karma`),
   getApprovedGifts: (id) => axios.get(`/v1/users/${id}/karma/approved_gifts`),
-  // getInvitations: () => axios.get(`/v1/users/${id.user_id}/invitations`),
-  // getInvitation: () => axios.get(`/v1/users/${id.user_id}/invitation/${id.id}`),
+  getInvitations: () => axios.get(`/v1/invitations`),
 
   getGoods: (id) => axios.get(`/v1/users/${id.user_id}/goods`),
   addGood: (id, data) => axios.post(`/v1/users/${id.user_id}/goods`, data),
