@@ -17,6 +17,7 @@ import Avatar from '@mui/material/Avatar';
 import Badge from '@mui/material/Badge';
 import { styled } from '@mui/material/styles';
 import StarIcon from '@mui/icons-material/Star';
+import InsertInvitationIcon from '@mui/icons-material/InsertInvitation';
 
 import useAuth from "../../../hooks/useAuth";
 import AddGood from "../../../pages/AddGood";
@@ -99,6 +100,15 @@ const Header = () => {
                     >
                       Add good
                     </Button>}
+                  {(auth.user.role === 'dead_moroz') &&
+                    <IconButton
+                      edge="start"
+                      color='inherit'
+                      component={Link} to="/invitations"
+                      sx={{ ml: 1 }}
+                    >
+                      <InsertInvitationIcon fontSize="large" />
+                    </IconButton>}
                   {(auth.user.role === 'elf' && karma) &&
                     <StyledBadge
                       badgeContent={(karma != null) ? karma.value : 0}
