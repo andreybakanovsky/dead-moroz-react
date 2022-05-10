@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 import {
   useParams,
-  useNavigate,
 } from 'react-router-dom';
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -52,8 +51,10 @@ const InvitationAdd = (props) => {
 
     try {
       await api.auth.addInvitation(fullData);
+      props.setChangeTable(true);
     } catch (e) {
       if (e.response.status === 422) {
+        props.setChangeTable(false);
         Object.keys(e.response.data).forEach((key) => {
           setError(key, {
             type: "manual",
@@ -68,6 +69,7 @@ const InvitationAdd = (props) => {
   };
 
   const onCancel = () => {
+    props.setChangeTable(false);
     handleClose();
   };
 
@@ -79,14 +81,14 @@ const InvitationAdd = (props) => {
     >
       <form onSubmit={handleSubmit(onSubmit)}>
         <Box sx={style}>
-              <Typography
-                id="modal-modal-title"
-                variant="h6"
-                component="h2"
-                textAlign="center"
-                sx={{ mb: '0.5rem' }}>
-                Invitate an elf
-              </Typography>
+          <Typography
+            id="modal-modal-title"
+            variant="h6"
+            component="h2"
+            textAlign="center"
+            sx={{ mb: '0.5rem' }}>
+            Invite an elf
+          </Typography>
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Controller
