@@ -2,6 +2,8 @@ import axios from "../axios";
 
 const endpoints = {
   signup: (data) => axios.post("/v1/authentication/sign_up", data),
+  checkInvitationSignup: (id, data) => axios.post(`/v1/authentication/sign_up/${id}/`, data),
+
   login: (data) => axios.post("/v1/authentication/sign_in", data),
   getProfile: () => axios.get("/v1/profile"),
   updateProfile: (data) => axios.patch("/v1/authentication/account_update", data),
@@ -20,7 +22,7 @@ const endpoints = {
   getInvitations: () => axios.get(`/v1/invitations`),
   addInvitation: (data) => axios.post(`/v1/invitations`, data),
   deleteInvitation: (id) => axios.delete(`/v1/invitations/${id}`),
-  sendInvitation: (id) => axios.get(`/v1/invitations/${id}/send_with_email`),
+  sendInvitation: (id) => axios.get(`/v1/invitations/${id}/send_by_email`),
 
   getGoods: (id) => axios.get(`/v1/users/${id.user_id}/goods`),
   addGood: (id, data) => axios.post(`/v1/users/${id.user_id}/goods`, data),

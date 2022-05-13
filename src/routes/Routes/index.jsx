@@ -51,6 +51,10 @@ function AppRoutes() {
         element={<GuestRoute> <Signup /> </GuestRoute>}
       />
       <Route
+        path="/sign_up/:invitation_id"
+        element={<GuestRoute> <Signup /> </GuestRoute>}
+      />
+      <Route
         path="/profile"
         element={<PrivateRoute> <Profile /> </PrivateRoute>}
       />
