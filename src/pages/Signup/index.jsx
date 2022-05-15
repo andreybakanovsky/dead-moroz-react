@@ -26,7 +26,8 @@ function Signup() {
   const id = useParams();
   const navigate = useNavigate();
   let [searchParams] = useSearchParams();
-  const [queryParams] = useState(() => Object.fromEntries([...searchParams]));
+  const [queryParams, setQueryParams] = useState(() => Object.fromEntries([...searchParams]));
+  const [invitationApproved, setInvitationApproved] = useState(false);
 
   const {
     control,
@@ -50,11 +51,13 @@ function Signup() {
     const queryParams = Object.fromEntries([...searchParams])
     if (uuidValidation(queryParams.some_magic)) {
       const data = {
-        "token": queryParams.some_magic
+        "token": queryParams.some_magic,
+        "email": queryParams.email
       };
       try {
-        console.log(data);
-        await api.auth.checkInvitationSignup(id.invitation_id, data);
+        const response = await api.auth.checkInvitationSignup(id.invitation_id, data);
+        console.log(response)
+        if (response.status === 200) setInvitationApproved(true);
       } catch (e) {
         console.log(e.response.status);
         console.log(e.response.data);
@@ -69,9 +72,11 @@ function Signup() {
   }, [id]);
 
   useEffect(() => {
+    setInvitationApproved(false);
     if ('invitation_id' in id) {
       checkInvitation();
     }
+    setQueryParams(() => Object.fromEntries([...searchParams]));
   }, [checkInvitation]);
 
   const onSubmit = async (data) => {
@@ -80,6 +85,9 @@ function Signup() {
       if ('invitation_id' in id) {
         data = {
           "role": 1,
+          "name": queryParams.name,
+          "token": queryParams.some_magic,
+          "email": queryParams.email,
           ...data
         }
       }
@@ -146,29 +154,34 @@ function Signup() {
                     mb: '1rem'
                   }}
                 >
-                  {(id && ('invitation_id' in id)) ? "Create you account" : "Create new account"}
+                  {(id && ('invitation_id' in id)) ? "Finish creating your account" : "Create an account"}
                 </Typography>
               </Grid>
             </Grid>
             <form onSubmit={handleSubmit(onSubmit)}>
               <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Controller
-                    name="name"
-                    control={control}
-                    defaultValue={(queryParams.name) ? queryParams.name : ""}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        error={Boolean(errors.name?.message)}
-                        fullWidth={true}
-                        label="Name"
-                        variant="outlined"
-                        helperText={errors.name?.message}
-                      />
-                    )}
-                  />
-                </Grid>
+                {(queryParams && invitationApproved && (queryParams.name !== "")) ?
+                  <></>
+                  :
+                  <Grid item xs={12}>
+                    <Controller
+                      name="name"
+                      control={control}
+                      defaultValue=""
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          error={Boolean(errors.name?.message)}
+                          fullWidth={true}
+                          label="Name"
+                          variant="outlined"
+                          helperText={errors.name?.message}
+                        />
+                      )}
+                    />
+                  </Grid>
+
+                }
                 <Grid item xs={12}>
                   <Controller
                     name="age"
@@ -186,24 +199,29 @@ function Signup() {
                     )}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <Controller
-                    name="email"
-                    control={control}
-                    defaultValue={(queryParams.email) ? queryParams.email : ""}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        error={Boolean(errors.email?.message)}
-                        fullWidth={true}
-                        type="email"
-                        label="Email"
-                        variant="outlined"
-                        helperText={errors.email?.message}
-                      />
-                    )}
-                  />
-                </Grid>
+                {(queryParams && invitationApproved) ?
+                  <></>
+                  :
+                  <Grid item xs={12}>
+                    <Controller
+                      name="email"
+                      control={control}
+                      defaultValue=""
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          error={Boolean(errors.email?.message)}
+                          fullWidth={true}
+                          type="email"
+                          label="Email"
+                          variant="outlined"
+                          helperText={errors.email?.message}
+                        />
+                      )}
+                    />
+                  </Grid>
+
+                }
                 <Grid item xs={12}>
                   <Controller
                     name="password"
