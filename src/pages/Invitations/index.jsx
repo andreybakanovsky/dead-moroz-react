@@ -82,6 +82,7 @@ function Invitations() {
     try {
       if (result) {
         await api.auth.sendInvitation(id);
+        loadData();
       }
     } catch (e) {
       console.log(e.response.status);
@@ -169,14 +170,15 @@ function Invitations() {
                       sx={{ color: 'darkgray', fontSize: 24 }}
                     />
                   </IconButton>}
+                  {(invitation.status === "created") &&
                   <IconButton
-                    aria-label="delete"
+                    aria-label="send"
                     onClick={() => onSend(invitation.id)}
                   >
                     <SendIcon
                       sx={{ color: 'darkgray', fontSize: 24 }}
                     />
-                  </IconButton>
+                  </IconButton>}
                 </TableCell>
               </TableRow>
             ))}
@@ -191,6 +193,7 @@ function Invitations() {
               </TableRow>
             }
           </TableBody>
+          {/* * - name can be change after the registration */}
         </Table>
       </Paper>
       <InvitationAdd
