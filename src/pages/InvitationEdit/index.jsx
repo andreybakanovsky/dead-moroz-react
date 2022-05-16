@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import validationSchema from "./validation";
+import validationSchema from "../InvitationAdd/validation";
 import api from "../../services/api";
 
 const style = {
