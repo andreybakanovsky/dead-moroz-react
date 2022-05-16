@@ -34,6 +34,8 @@ function Signup() {
     handleSubmit,
     formState: { errors },
     setError,
+    setValue,
+    reset
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
@@ -51,13 +53,16 @@ function Signup() {
     const queryParams = Object.fromEntries([...searchParams])
     if (uuidValidation(queryParams.some_magic)) {
       const data = {
-        "token": queryParams.some_magic,
+        "invitation_token": queryParams.some_magic,
         "email": queryParams.email
       };
       try {
         const response = await api.auth.checkInvitationSignup(id.invitation_id, data);
-        console.log(response)
-        if (response.status === 200) setInvitationApproved(true);
+        if (response.status === 200) {
+          setInvitationApproved(true);
+          setValue('name', queryParams.name)
+          setValue('email', queryParams.email)
+        }
       } catch (e) {
         console.log(e.response.status);
         console.log(e.response.data);
@@ -79,22 +84,31 @@ function Signup() {
     setQueryParams(() => Object.fromEntries([...searchParams]));
   }, [checkInvitation]);
 
+  useEffect(() => {
+    if (!('invitation_id' in id)) { reset() }
+  }, [id]);
+
   const onSubmit = async (data) => {
     try {
       setIsLoading(true);
       if ('invitation_id' in id) {
-        data = {
-          "role": 1,
-          "name": queryParams.name,
-          "token": queryParams.some_magic,
+        const signupData = {
+          "invitation_id": id.invitation_id,
+          "invitation_token": queryParams.some_magic,
           "email": queryParams.email,
-          ...data
+          "user": {
+            "role": 1,
+            ...data
+          }
         }
+        await api.auth.signup(signupData);
       }
-      console.log("data", data)
-      await api.auth.signup({
-        "user": data // devise gem requested "user"
-      });
+      else {
+        await api.auth.signup({
+          "user": data // devise gem requests "user"
+        });
+      }
+
       const { data: loginData } = await api.auth.login({
         "user": data
       });
@@ -160,28 +174,24 @@ function Signup() {
             </Grid>
             <form onSubmit={handleSubmit(onSubmit)}>
               <Grid container spacing={3}>
-                {(queryParams && invitationApproved && (queryParams.name !== "")) ?
-                  <></>
-                  :
-                  <Grid item xs={12}>
-                    <Controller
-                      name="name"
-                      control={control}
-                      defaultValue=""
-                      render={({ field }) => (
-                        <TextField
-                          {...field}
-                          error={Boolean(errors.name?.message)}
-                          fullWidth={true}
-                          label="Name"
-                          variant="outlined"
-                          helperText={errors.name?.message}
-                        />
-                      )}
-                    />
-                  </Grid>
-
-                }
+                <Grid item xs={12}
+                >
+                  <Controller
+                    name="name"
+                    control={control}
+                    defaultValue=""
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        error={Boolean(errors.name?.message)}
+                        fullWidth={true}
+                        label="Name"
+                        variant="outlined"
+                        helperText={errors.name?.message}
+                      />
+                    )}
+                  />
+                </Grid>
                 <Grid item xs={12}>
                   <Controller
                     name="age"
@@ -199,29 +209,25 @@ function Signup() {
                     )}
                   />
                 </Grid>
-                {(queryParams && invitationApproved) ?
-                  <></>
-                  :
-                  <Grid item xs={12}>
-                    <Controller
-                      name="email"
-                      control={control}
-                      defaultValue=""
-                      render={({ field }) => (
-                        <TextField
-                          {...field}
-                          error={Boolean(errors.email?.message)}
-                          fullWidth={true}
-                          type="email"
-                          label="Email"
-                          variant="outlined"
-                          helperText={errors.email?.message}
-                        />
-                      )}
-                    />
-                  </Grid>
-
-                }
+                <Grid item xs={12}>
+                  <Controller
+                    name="email"
+                    control={control}
+                    defaultValue=""
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        error={Boolean(errors.email?.message)}
+                        fullWidth={true}
+                        type="email"
+                        label="Email"
+                        variant="outlined"
+                        helperText={errors.email?.message}
+                        disabled={(invitationApproved) ? true : false}
+                      />
+                    )}
+                  />
+                </Grid>
                 <Grid item xs={12}>
                   <Controller
                     name="password"
