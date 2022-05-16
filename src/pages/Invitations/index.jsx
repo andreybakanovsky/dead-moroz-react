@@ -18,17 +18,32 @@ import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import SendIcon from '@mui/icons-material/Send';
+import EditIcon from '@mui/icons-material/Edit';
 
 import InvitationAdd from "../InvitationAdd"
+import InvitationEdit from "../InvitationEdit"
 
 function Invitations() {
   const navigate = useNavigate();
   const [invitations, setInvitations] = useState();
   const [openAdd, setOpenAdd] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [invitationEditId, setInvitationEditId] = useState(null);
+
 
   const handleOpenAdd = () => setOpenAdd(true);
   const handleCloseAdd = (state) => { setOpenAdd(state) }
   const handleChangeAdd = (state) => { if (state) loadData() }
+
+  const handleOpenEdit = (id) => {
+    setOpenEdit(true);
+    setInvitationEditId(id)
+  }
+  const handleCloseEdit = (state) => { 
+    setOpenEdit(state)
+      setInvitationEditId(null)
+  }
+  const handleChangeEdit = (state) => { if (state) loadData() }
 
   const loadData = useCallback(async () => {
     try {
@@ -145,6 +160,15 @@ function Invitations() {
                       sx={{ color: 'darkgray', fontSize: 24 }}
                     />
                   </IconButton>
+                  {(invitation.status === "created") &&
+                  <IconButton
+                    aria-label="edit"
+                    onClick={() => handleOpenEdit(invitation.id)}
+                  >
+                    <EditIcon
+                      sx={{ color: 'darkgray', fontSize: 24 }}
+                    />
+                  </IconButton>}
                   <IconButton
                     aria-label="delete"
                     onClick={() => onSend(invitation.id)}
@@ -173,6 +197,12 @@ function Invitations() {
         setStateModal={handleCloseAdd}
         setChangeTable={handleChangeAdd}
         stateOpen={openAdd} />
+      <InvitationEdit
+        setStateModal={handleCloseEdit}
+        setChangeTable={handleChangeEdit}
+        stateOpen={openEdit}
+        id={invitationEditId}
+      />
     </Container>
   );
 }

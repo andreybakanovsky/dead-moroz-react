@@ -23,6 +23,8 @@ const endpoints = {
   addInvitation: (data) => axios.post(`/v1/invitations`, data),
   deleteInvitation: (id) => axios.delete(`/v1/invitations/${id}`),
   sendInvitation: (id) => axios.get(`/v1/invitations/${id}/send_by_email`),
+  getInvitation: (id) => axios.get(`/v1/invitations/${id}`),
+  updateInvitation: (id, data) => axios.patch(`/v1/invitations/${id}`, data),
 
   getGoods: (id) => axios.get(`/v1/users/${id.user_id}/goods`),
   addGood: (id, data) => axios.post(`/v1/users/${id.user_id}/goods`, data),
