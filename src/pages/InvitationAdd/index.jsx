@@ -52,6 +52,7 @@ const InvitationAdd = (props) => {
     try {
       await api.auth.addInvitation(fullData);
       props.setChangeTable(true);
+      handleClose();
     } catch (e) {
       if (e.response.status === 422) {
         props.setChangeTable(false);
@@ -62,10 +63,7 @@ const InvitationAdd = (props) => {
           });
         });
       }
-    } finally {
-      handleClose();
-      reset();
-    }
+    } 
   };
 
   const onCancel = () => {
