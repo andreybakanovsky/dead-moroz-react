@@ -2,22 +2,29 @@ import axios from "../axios";
 
 const endpoints = {
   signup: (data) => axios.post("/v1/authentication/sign_up", data),
+  checkInvitationSignup: (id, data) => axios.post(`/v1/authentication/sign_up/${id}/`, data),
+
   login: (data) => axios.post("/v1/authentication/sign_in", data),
   getProfile: () => axios.get("/v1/profile"),
   updateProfile: (data) => axios.patch("/v1/authentication/account_update", data),
 
   getUsers: () => axios.get("/v1/users"),
   getUser: (id) => axios.get(`/v1/users/${id.user_id}`),
-  getUserAvarageGrade:(id) => axios.get(`/v1/users/${id.user_id}/average_grade`),
-  getUserYears:(id) => axios.get(`/v1/users/${id.user_id}/good_years`),
-  getSuggestedGiftsForYear:(id, year) => axios.get(`/v1/users/${id.user_id}/suggested_gifts/${year}`),
-  getRequestedGiftsForYear:(id, year) => axios.get(`/v1/users/${id.user_id}/requested_gifts/${year}`),
-  getReviewsForYear:(id, year) => axios.get(`/v1/users/${id.user_id}/reviews/${year}`),
+  getUserAvarageGrade: (id) => axios.get(`/v1/users/${id.user_id}/average_grade`),
+  getUserYears: (id) => axios.get(`/v1/users/${id.user_id}/good_years`),
+  getSuggestedGiftsForYear: (id, year) => axios.get(`/v1/users/${id.user_id}/suggested_gifts/${year}`),
+  getRequestedGiftsForYear: (id, year) => axios.get(`/v1/users/${id.user_id}/requested_gifts/${year}`),
+  getReviewsForYear: (id, year) => axios.get(`/v1/users/${id.user_id}/reviews/${year}`),
 
   getKarma: (id) => axios.get(`/v1/users/${id}/karma`),
   getApprovedGifts: (id) => axios.get(`/v1/users/${id}/karma/approved_gifts`),
-  // getInvitations: () => axios.get(`/v1/users/${id.user_id}/invitations`),
-  // getInvitation: () => axios.get(`/v1/users/${id.user_id}/invitation/${id.id}`),
+
+  getInvitations: () => axios.get(`/v1/invitations`),
+  addInvitation: (data) => axios.post(`/v1/invitations`, data),
+  deleteInvitation: (id) => axios.delete(`/v1/invitations/${id}`),
+  sendInvitation: (id) => axios.get(`/v1/invitations/${id}/send_by_email`),
+  getInvitation: (id) => axios.get(`/v1/invitations/${id}`),
+  updateInvitation: (id, data) => axios.patch(`/v1/invitations/${id}`, data),
 
   getGoods: (id) => axios.get(`/v1/users/${id.user_id}/goods`),
   addGood: (id, data) => axios.post(`/v1/users/${id.user_id}/goods`, data),
