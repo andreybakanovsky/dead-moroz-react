@@ -43,6 +43,7 @@ const InvitationEdit = (props) => {
     try {
       await api.auth.updateInvitation(props.id, data);
       props.setChangeTable(true);
+      handleClose();
     } catch (e) {
       if (e.response.status === 422) {
         props.setChangeTable(false);
@@ -53,9 +54,7 @@ const InvitationEdit = (props) => {
           });
         });
       }
-    } finally {
-      handleClose();
-    }
+    } 
   };
 
   const onCancel = () => {
