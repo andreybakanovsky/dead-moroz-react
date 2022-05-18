@@ -3,6 +3,8 @@ import {
   Container,
   Paper,
   Grid,
+  Snackbar,
+  SnackbarContent,
 } from "@mui/material";
 import api from "../../services/api";
 import {
@@ -29,7 +31,10 @@ function Invitations() {
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [invitationEditId, setInvitationEditId] = useState(null);
-
+  const [openSnackbar, setOpenSnackbar] = useState({
+    state: false,
+    message: ''
+  });
 
   const handleOpenAdd = () => setOpenAdd(true);
   const handleCloseAdd = (state) => { setOpenAdd(state) }
@@ -39,9 +44,9 @@ function Invitations() {
     setOpenEdit(true);
     setInvitationEditId(id)
   }
-  const handleCloseEdit = (state) => { 
+  const handleCloseEdit = (state) => {
     setOpenEdit(state)
-      setInvitationEditId(null)
+    setInvitationEditId(null)
   }
   const handleChangeEdit = (state) => { if (state) loadData() }
 
@@ -67,6 +72,10 @@ function Invitations() {
     try {
       if (result) {
         await api.auth.deleteInvitation(id);
+        setOpenSnackbar({
+          state: true,
+          message: "The invitation was deleted"
+        });
         const newInvitations = invitations.filter(invitation => id !== invitation.id)
         setInvitations(newInvitations);
       }
@@ -82,6 +91,10 @@ function Invitations() {
     try {
       if (result) {
         await api.auth.sendInvitation(id);
+        setOpenSnackbar({
+          state: true,
+          message: "The invitation was sent successfully"
+        });
         loadData();
       }
     } catch (e) {
@@ -162,23 +175,23 @@ function Invitations() {
                     />
                   </IconButton>
                   {(invitation.status === "created") &&
-                  <IconButton
-                    aria-label="edit"
-                    onClick={() => handleOpenEdit(invitation.id)}
-                  >
-                    <EditIcon
-                      sx={{ color: 'darkgray', fontSize: 24 }}
-                    />
-                  </IconButton>}
+                    <IconButton
+                      aria-label="edit"
+                      onClick={() => handleOpenEdit(invitation.id)}
+                    >
+                      <EditIcon
+                        sx={{ color: 'darkgray', fontSize: 24 }}
+                      />
+                    </IconButton>}
                   {(invitation.status === "created") &&
-                  <IconButton
-                    aria-label="send"
-                    onClick={() => onSend(invitation.id)}
-                  >
-                    <SendIcon
-                      sx={{ color: 'darkgray', fontSize: 24 }}
-                    />
-                  </IconButton>}
+                    <IconButton
+                      aria-label="send"
+                      onClick={() => onSend(invitation.id)}
+                    >
+                      <SendIcon
+                        sx={{ color: 'darkgray', fontSize: 24 }}
+                      />
+                    </IconButton>}
                 </TableCell>
               </TableRow>
             ))}
@@ -206,6 +219,16 @@ function Invitations() {
         stateOpen={openEdit}
         id={invitationEditId}
       />
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        open={openSnackbar.state}
+        autoHideDuration={6000}
+        onClose={() => setOpenSnackbar({state: false, message:""})}
+      >
+        <SnackbarContent
+          message= {openSnackbar.message}
+        />
+      </Snackbar>
     </Container>
   );
 }
