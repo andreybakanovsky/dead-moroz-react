@@ -35,7 +35,6 @@ function Signup() {
     formState: { errors },
     setError,
     setValue,
-    reset
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
@@ -74,7 +73,7 @@ function Signup() {
     else {
       notFound();
     }
-  }, [id]);
+  }, []);
 
   useEffect(() => {
     setInvitationApproved(false);
@@ -83,10 +82,6 @@ function Signup() {
     }
     setQueryParams(() => Object.fromEntries([...searchParams]));
   }, [checkInvitation]);
-
-  useEffect(() => {
-    if (!('invitation_id' in id)) { reset() }
-  }, [id]);
 
   const onSubmit = async (data) => {
     try {
@@ -108,7 +103,6 @@ function Signup() {
           "user": data // devise gem requests "user"
         });
       }
-
       const { data: loginData } = await api.auth.login({
         "user": data
       });
