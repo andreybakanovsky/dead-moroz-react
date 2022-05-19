@@ -4,12 +4,17 @@ import {
   Paper,
   Grid,
   Typography,
+  IconButton,
 } from "@mui/material";
 import api from "../../services/api";
 import Badge from '@mui/material/Badge';
 import Avatar from '@mui/material/Avatar';
 import { styled } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
+import GradingIcon from '@mui/icons-material/Grading';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+
+import useAuth from "../../hooks/useAuth";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   '& .MuiBadge-badge': {
@@ -41,12 +46,13 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 }));
 
 function Users() {
-  const [data, setData] = useState();
+  const [users, setUsers] = useState();
+  const auth = useAuth();
 
   const loadData = async () => {
     try {
       const response = await api.auth.getUsers();
-      setData(response.data);
+      setUsers(response.data);
     } catch (e) {
       console.log(e.response.status)
       console.log(e.response.data)
@@ -57,9 +63,24 @@ function Users() {
     loadData();
   }, []);
 
+  const onDelete = async (id) => {
+    var result = window.confirm(`Would you like to delete the user?`);
+    try {
+      if (result) {
+        await api.auth.deleteUser(id);
+        const newUsers = users.filter(user => id !== user.id)
+        setUsers(newUsers);
+      }
+    } catch (e) {
+      console.log(e.response.status);
+      console.log(e.response.data);
+    } finally {
+    }
+  };
+
   return (
     <Container >
-      {data && data.map(user => {
+      {users && users.map(user => {
         return <Grid sx={{ m: 2 }} key={user.id}>
           <Paper
             sx={{
@@ -69,23 +90,51 @@ function Users() {
               flexGrow: 1
             }}
           >
-            <StyledBadge
-              overlap="circular"
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-              variant="standard"
-            >
-              <Avatar alt="Remy Sharp" src={user.avatar} />
-            </StyledBadge>
-            <Typography
-              variant="h6"
-              gutterBottom
-              component="div"
-              sx={{ ml: 2, display: 'inline-block' }}
-              component={Link} to={`/users/${user.id}/goods/`} state={user}
-              underline="none"
-            >
-              {user.name}
-            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={4}>
+                <StyledBadge
+                  overlap="circular"
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  variant="standard"
+                >
+                  <Avatar alt="Remy Sharp" src={user.avatar} />
+                </StyledBadge>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  component="div"
+                  sx={{ ml: 2, display: 'inline-block' }}
+                  component={Link} to={`/users/${user.id}/goods/`} state={user}
+                  underline="none"
+                >
+                  {user.name}
+                </Typography>
+              </Grid>
+              <Grid item xs={4}>
+                {(auth.user.role === "dead_moroz") &&
+                  <>
+                  {(user.role === "kid") &&
+                    <IconButton aria-label="Summarize"
+                      component={Link} to={`/users/${user.id}/statistics`} state={user}
+                    >
+                      <GradingIcon
+                        className="dead-moroz-green-color"
+                        sx={{ fontSize: 26 }}
+                      />
+                    </IconButton>}
+                    {(user.role !== "dead_moroz") &&
+                    <IconButton
+                      aria-label="delete"
+                      onClick={() => onDelete(user.id)}
+                    >
+                      <DeleteOutlineIcon
+                        sx={{ color: 'darkgray', fontSize: 26 }}
+                      />
+                    </IconButton>}
+                  </>
+                }
+              </Grid>
+            </Grid>
           </Paper>
         </Grid>
       })}

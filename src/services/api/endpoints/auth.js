@@ -10,6 +10,7 @@ const endpoints = {
 
   getUsers: () => axios.get("/v1/users"),
   getUser: (id) => axios.get(`/v1/users/${id.user_id}`),
+  deleteUser: (id) => axios.delete(`/v1/users/${id}`),
   getUserAvarageGrade: (id) => axios.get(`/v1/users/${id.user_id}/average_grade`),
   getUserYears: (id) => axios.get(`/v1/users/${id.user_id}/good_years`),
   getSuggestedGiftsForYear: (id, year) => axios.get(`/v1/users/${id.user_id}/suggested_gifts/${year}`),
