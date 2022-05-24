@@ -203,6 +203,7 @@ function Invitations() {
                 </TableCell>
                 <TableCell > </TableCell>
                 <TableCell > </TableCell>
+                <TableCell > </TableCell>
               </TableRow>
             }
           </TableBody>

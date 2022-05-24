@@ -44,13 +44,8 @@ const InvitationAdd = (props) => {
   });
 
   const onSubmit = async (data) => {
-    const fullData = {
-      "status": 0,
-      ...data
-    }
-
     try {
-      await api.auth.addInvitation(fullData);
+      await api.auth.addInvitation(data);
       props.setChangeTable(true);
       handleClose();
     } catch (e) {
