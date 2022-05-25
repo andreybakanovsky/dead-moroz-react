@@ -13,6 +13,10 @@ import { styled } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
 import GradingIcon from '@mui/icons-material/Grading';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import Pagination from '@mui/material/Pagination';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+import Cookies from "js-cookie";
 
 import useAuth from "../../hooks/useAuth";
 
@@ -45,14 +49,27 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
+const variantsUsersOnPage = ['10', '15', '20'];
+
 function Users() {
   const [users, setUsers] = useState();
   const auth = useAuth();
+  const [usersOnPage, setUsersOnPage] = useState(() => {
+    const countFromCookies = Cookies.get("users-on-page");
+    return (countFromCookies == null) ? variantsUsersOnPage[0] : countFromCookies;
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [usersCount, setUsersCount] = useState(null);
 
   const loadData = async () => {
+    const params = {
+      page_size: usersOnPage,
+      page: currentPage
+    }
     try {
-      const response = await api.auth.getUsers();
-      setUsers(response.data);
+      const response = await api.auth.getUsers(params);
+      setUsers(response.data.users);
+      setUsersCount(response.data.metadata.records_count)
     } catch (e) {
       console.log(e.response.status)
       console.log(e.response.data)
@@ -61,7 +78,7 @@ function Users() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [currentPage, usersOnPage]);
 
   const onDelete = async (id) => {
     var result = window.confirm(`Would you like to delete the user?`);
@@ -102,7 +119,6 @@ function Users() {
                 <Typography
                   variant="h6"
                   gutterBottom
-                  component="div"
                   sx={{ ml: 2, display: 'inline-block' }}
                   component={Link} to={`/users/${user.id}/goods/`} state={user}
                   underline="none"
@@ -113,24 +129,24 @@ function Users() {
               <Grid item xs={4}>
                 {(auth.user.role === "dead_moroz") &&
                   <>
-                  {(user.role === "kid") &&
-                    <IconButton aria-label="Summarize"
-                      component={Link} to={`/users/${user.id}/statistics`} state={user}
-                    >
-                      <GradingIcon
-                        className="dead-moroz-green-color"
-                        sx={{ fontSize: 26 }}
-                      />
-                    </IconButton>}
+                    {(user.role === "kid") &&
+                      <IconButton aria-label="Summarize"
+                        component={Link} to={`/users/${user.id}/statistics`} state={user}
+                      >
+                        <GradingIcon
+                          className="dead-moroz-green-color"
+                          sx={{ fontSize: 26 }}
+                        />
+                      </IconButton>}
                     {(user.role !== "dead_moroz") &&
-                    <IconButton
-                      aria-label="delete"
-                      onClick={() => onDelete(user.id)}
-                    >
-                      <DeleteOutlineIcon
-                        sx={{ color: 'darkgray', fontSize: 26 }}
-                      />
-                    </IconButton>}
+                      <IconButton
+                        aria-label="delete"
+                        onClick={() => onDelete(user.id)}
+                      >
+                        <DeleteOutlineIcon
+                          sx={{ color: 'darkgray', fontSize: 26 }}
+                        />
+                      </IconButton>}
                   </>
                 }
               </Grid>
@@ -138,6 +154,49 @@ function Users() {
           </Paper>
         </Grid>
       })}
+      <Grid
+        container
+        direction="row"
+        justifyContent="center"
+        alignItems="center"
+        sx={{ p: 2 }}
+      >
+        <Pagination
+          sx={{ margin: 'flex' }}
+          count={Math.ceil(usersCount / usersOnPage)}
+          variant="outlined"
+          shape="rounded"
+          onChange={(event, newPage) => {
+            setCurrentPage(newPage)
+          }}
+        />
+        <Typography
+          variant="body1"
+          gutterBottom
+          sx={{ ml: 10, display: 'inline-block' }}
+          underline="none"
+        >
+          users per page
+        </Typography>
+        <Autocomplete
+          disableClearable
+          value={usersOnPage}
+          onChange={(event, newValue) => {
+            setUsersOnPage(newValue);
+            Cookies.set("users-on-page", newValue);
+          }}
+          id="controllable-states"
+          options={variantsUsersOnPage}
+          sx={{ pl: 2, width: 60 }}
+          renderInput={(params) =>
+            <TextField {...params}
+              size="small"
+              inputProps={{ ...params.inputProps, style: { fontSize: "0.9rem" }, readOnly: true }}
+              variant="standard"
+              color="primary"
+            />}
+        />
+      </Grid>
     </Container>
 
   );
