@@ -8,7 +8,7 @@ const endpoints = {
   getProfile: () => axios.get("/v1/profile"),
   updateProfile: (data) => axios.patch("/v1/authentication/account_update", data),
 
-  getUsers: () => axios.get("/v1/users"),
+  getUsers: (params) => axios.get(`/v1/users/page_size/${params.page_size}/page/${params.page}`),
   getUser: (id) => axios.get(`/v1/users/${id.user_id}`),
   deleteUser: (id) => axios.delete(`/v1/users/${id}`),
   getUserAvarageGrade: (id) => axios.get(`/v1/users/${id.user_id}/average_grade`),
