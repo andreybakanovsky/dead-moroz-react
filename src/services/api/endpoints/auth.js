@@ -45,7 +45,7 @@ const endpoints = {
   getReview: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.id}`),
   updateReview: (id, data) => axios.patch(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.id}`, data),
   addReview: (id, data) => axios.post(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews`, data),
-  deleteReview: (id) => axios.delete(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.id}`),
+  discardReview: (id) => axios.delete(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.id}`),
   undiscardReview: (id) => axios.patch(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.id}/undiscard`),
 
   getSuggestedGifts: (id) => axios.get(`/v1/users/${id.user_id}/goods/${id.good_id}/reviews/${id.review_id}/gifts`),

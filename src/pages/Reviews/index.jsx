@@ -223,15 +223,21 @@ function Reviews() {
   const getComment = (stringComment) => JSON.parse(stringComment).comment
   const getAuthor = (stringComment) => JSON.parse(stringComment).author
 
-  const onDelete = async (reviewId) => {
-    var result = window.confirm(`Would you like to delete the review?`);
+  const onDiscard = async (reviewId) => {
+    var result = null
+    if (auth.user.role === "dead_moroz") {
+      result = true
+    }
+    else {
+      result = window.confirm(`Would you like to delete the review?`);
+    }
     try {
       if (result) {
         const allIds = {
           ...id,
           "id": `${reviewId}`
         }
-        const data = await api.auth.deleteReview(allIds);
+        const data = await api.auth.discardReview(allIds);
         const response = await api.auth.getReviews(id);
         setReviews(response.data);
       }
@@ -242,23 +248,7 @@ function Reviews() {
     }
   };
 
-  const onDiscard = async (reviewId) => {
-    try {
-      const allIds = {
-        ...id,
-        "id": `${reviewId}`
-      }
-      const data = await api.auth.deleteReview(allIds);
-      const response = await api.auth.getReviews(id);
-      setReviews(response.data);
-    } catch (e) {
-      console.log(e.response.status);
-      console.log(e.response.data);
-    } finally {
-    }
-  };
-
-  const onUndistract = async (reviewId) => {
+  const onUndiscard = async (reviewId) => {
     try {
       const allIds = {
         ...id,
@@ -631,7 +621,6 @@ function Reviews() {
             <TableBody>
               {reviews && reviews.map((review, index) =>
                 <React.Fragment key={review.id}>
-                  {/* { review.discarded_at} */}
                   <TableRow
                     sx={{
                       height: 10,
@@ -646,7 +635,7 @@ function Reviews() {
                     <TableCell sx={{ padding: "16px 16px" }}>{getAuthor(review.comment)}</TableCell>
                     <TableCell sx={{ padding: "16px 16px" }}>{getDate(review.updated_at)}</TableCell>
                     <TableCell sx={{ padding: "10px 16px" }}>
-                      {(review.user_id === auth.user.id) &&
+                      {(review.user_id === auth.user.id) && (review.discarded_at === null) &&
                         <>
                           {(editReviewId !== review.id) ?
                             <IconButton aria-label="edit"
@@ -667,14 +656,13 @@ function Reviews() {
                           {(!editMode) &&
                             <IconButton
                               aria-label="delete"
-                              onClick={() => onDelete(review.id)}
+                              onClick={() => onDiscard(review.id)}
                             >
-                              <DeleteOutlineIcon
+                              <DeleteSweepIcon
                                 sx={{ color: 'darkgray', fontSize: 24 }}
                               />
                             </IconButton>}
-                        </>
-                      }
+                        </>}
                       {(auth.user.role === "dead_moroz") &&
                         (auth.user.id !== review.user_id) &&
                         (!editMode) &&
@@ -686,8 +674,8 @@ function Reviews() {
                             if (review.discarded_at === null) {
                               setOpenArrowIcon(values => values.map((value, i) => { if (i === index) value = false }));
                             }
-                          }
-                          }>
+                          }}
+                        >
                           <DeleteSweepIcon
                             sx={{ color: 'darkgray', fontSize: 24 }}
                           />
@@ -695,7 +683,7 @@ function Reviews() {
                       {(review.discarded_at !== null) &&
                         <IconButton
                           aria-label="delete"
-                          onClick={() => onUndistract(review.id)}
+                          onClick={() => onUndiscard(review.id)}
                         >
                           <RestoreFromTrashIcon
                             sx={{ color: 'darkgray', fontSize: 24 }}
