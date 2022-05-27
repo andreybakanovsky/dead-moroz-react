@@ -24,6 +24,8 @@ import AddIcon from '@mui/icons-material/Add';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import TranslateIcon from '@mui/icons-material/Translate';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
+import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -221,18 +223,40 @@ function Reviews() {
   const getComment = (stringComment) => JSON.parse(stringComment).comment
   const getAuthor = (stringComment) => JSON.parse(stringComment).author
 
-  const onDelete = async (reviewId) => {
-    var result = window.confirm(`Would you like to delete the review?`);
+  const onDiscard = async (reviewId) => {
+    var result = null
+    if (auth.user.role === "dead_moroz") {
+      result = true
+    }
+    else {
+      result = window.confirm(`Would you like to delete the review?`);
+    }
     try {
       if (result) {
         const allIds = {
           ...id,
           "id": `${reviewId}`
         }
-        const data = await api.auth.deleteReview(allIds);
+        const data = await api.auth.discardReview(allIds);
         const response = await api.auth.getReviews(id);
         setReviews(response.data);
       }
+    } catch (e) {
+      console.log(e.response.status);
+      console.log(e.response.data);
+    } finally {
+    }
+  };
+
+  const onUndiscard = async (reviewId) => {
+    try {
+      const allIds = {
+        ...id,
+        "id": `${reviewId}`
+      }
+      const data = await api.auth.undiscardReview(allIds);
+      const response = await api.auth.getReviews(id);
+      setReviews(response.data);
     } catch (e) {
       console.log(e.response.status);
       console.log(e.response.data);
@@ -587,7 +611,10 @@ function Reviews() {
                 <TableCell                      >Comment</TableCell>
                 <TableCell sx={{ width: "15%" }}>Author</TableCell>
                 <TableCell sx={{ width: "7%" }}>Changed</TableCell>
-                <TableCell sx={{ width: "12%" }}>Author's tools</TableCell>
+                <TableCell
+                  sx={{ width: "12%" }}>
+                  {(auth.user.role === "dead_moroz") ? "Tools" : "Author's tools"}
+                </TableCell>
                 <TableCell sx={{ width: "14%" }}>Suggested gifts </TableCell>
               </TableRow>
             </TableHead>
@@ -595,8 +622,12 @@ function Reviews() {
               {reviews && reviews.map((review, index) =>
                 <React.Fragment key={review.id}>
                   <TableRow
-                    sx={{ height: 10 }}
-                    sx={{ fontStyle: (editMode && editReviewId === review.id) ? 'italic' : undefined }}
+                    sx={{
+                      height: 10,
+                      fontStyle: (editMode && editReviewId === review.id) ? 'italic' : undefined,
+                      fontStyle: (review.discarded_at !== null) ? 'italic' : undefined,
+                      textDecoration: (review.discarded_at !== null) ? "line-through" : undefined
+                    }}
                     selected={(editMode && editReviewId === review.id)}
                   >
                     <TableCell sx={{ padding: "16px 16px" }}>{review.grade}</TableCell>
@@ -604,7 +635,7 @@ function Reviews() {
                     <TableCell sx={{ padding: "16px 16px" }}>{getAuthor(review.comment)}</TableCell>
                     <TableCell sx={{ padding: "16px 16px" }}>{getDate(review.updated_at)}</TableCell>
                     <TableCell sx={{ padding: "10px 16px" }}>
-                      {(review.user_id === auth.user.id) &&
+                      {(review.user_id === auth.user.id) && (review.discarded_at === null) &&
                         <>
                           {(editReviewId !== review.id) ?
                             <IconButton aria-label="edit"
@@ -625,26 +656,57 @@ function Reviews() {
                           {(!editMode) &&
                             <IconButton
                               aria-label="delete"
-                              onClick={() => onDelete(review.id)}
+                              onClick={() => {
+                                onDiscard(review.id)
+                                if (review.discarded_at === null) {
+                                  setOpenArrowIcon(values => values.map((value, i) => { if (i === index) value = false }));
+                                }
+                              }}
                             >
-                              <DeleteOutlineIcon
+                              <DeleteSweepIcon
                                 sx={{ color: 'darkgray', fontSize: 24 }}
                               />
                             </IconButton>}
-                        </>
-                      }
+                        </>}
+                      {(auth.user.role === "dead_moroz") &&
+                        (auth.user.id !== review.user_id) &&
+                        (!editMode) &&
+                        (review.discarded_at === null) &&
+                        <IconButton
+                          aria-label="delete"
+                          onClick={() => {
+                            onDiscard(review.id);
+                            if (review.discarded_at === null) {
+                              setOpenArrowIcon(values => values.map((value, i) => { if (i === index) value = false }));
+                            }
+                          }}
+                        >
+                          <DeleteSweepIcon
+                            sx={{ color: 'darkgray', fontSize: 24 }}
+                          />
+                        </IconButton>}
+                      {(review.discarded_at !== null) &&
+                        <IconButton
+                          aria-label="delete"
+                          onClick={() => onUndiscard(review.id)}
+                        >
+                          <RestoreFromTrashIcon
+                            sx={{ color: 'darkgray', fontSize: 24 }}
+                          />
+                        </IconButton>}
                     </TableCell>
                     <TableCell sx={{ padding: "0px 16px" }}>
-                      <IconButton
-                        aria-label="expand row"
-                        size="small"
-                        onClick={() => {
-                          if ((!openArrowIcon[index]) && !(suggestedGifts[review.id])) loadSuggestedGifts(review.id);
-                          setOpenArrowIcon(values => values.map((value, i) => i === index ? !value : value));
-                        }}
-                      >
-                        {openArrowIcon[index] ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                      </IconButton>
+                      {(review.discarded_at === null) &&
+                        <IconButton
+                          aria-label="expand row"
+                          size="small"
+                          onClick={() => {
+                            if ((!openArrowIcon[index]) && !(suggestedGifts[review.id])) loadSuggestedGifts(review.id);
+                            setOpenArrowIcon(values => values.map((value, i) => i === index ? !value : value));
+                          }}
+                        >
+                          {openArrowIcon[index] ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                        </IconButton>}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -767,7 +829,7 @@ function Reviews() {
         stateOpen={openModalEdit}
         ids={editGiftIds}
       />
-    </Container>
+    </Container >
   );
 }
 
