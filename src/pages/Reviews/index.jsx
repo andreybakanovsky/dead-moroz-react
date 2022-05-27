@@ -656,7 +656,12 @@ function Reviews() {
                           {(!editMode) &&
                             <IconButton
                               aria-label="delete"
-                              onClick={() => onDiscard(review.id)}
+                              onClick={() => {
+                                onDiscard(review.id)
+                                if (review.discarded_at === null) {
+                                  setOpenArrowIcon(values => values.map((value, i) => { if (i === index) value = false }));
+                                }
+                              }}
                             >
                               <DeleteSweepIcon
                                 sx={{ color: 'darkgray', fontSize: 24 }}
@@ -824,7 +829,7 @@ function Reviews() {
         stateOpen={openModalEdit}
         ids={editGiftIds}
       />
-    </Container>
+    </Container >
   );
 }
 
