@@ -16,24 +16,23 @@ import parse, { domToReact } from 'html-react-parser';
 import {
   Navigate,
 } from 'react-router-dom';
-
+import Link from '@mui/material/Link';
 
 function SearchPage() {
   const searchRef = useRef(null);
   const auth = useAuth();
-  const [results, setResults] = useState(null);
+  const [searchResults, setSearchResults] = useState();
   const [queryString, setQueryString] = useState();
 
   useEffect(() => {
-    if (searchRef !== null) searchRef.current.focus();
+    if (searchRef.current !== null) searchRef.current.focus();
   }, []);
 
   const search = async () => {
     if (queryString !== null) {
       try {
         const response = await api.auth.search(queryString);
-        setResults(response.data);
-        console.log(response.data);
+        setSearchResults(response.data)
       } catch (e) {
         console.log(e.response.status);
         console.log(e.response.data);
@@ -60,16 +59,14 @@ function SearchPage() {
   };
 
   const getHighlightedText = (obj) => {
-    let arr = []
+    let searchedPartsInRecord = []
     Object.values(obj.highlight).map((parts) => {
       parts.map((part, i, { length }) => {
-        arr.push(parse(part, options));
-        if (i + 1 !== length) arr.push(' ... ');
-        if (part.last) console.log("last part ", part);
-      }
-      )
+        searchedPartsInRecord.push(parse(part, options));
+        if (i + 1 !== length) searchedPartsInRecord.push(' ... ');
+      })
     })
-    return arr
+    return searchedPartsInRecord
   }
 
   function capitalizeFirstLetter(string) {
@@ -82,7 +79,9 @@ function SearchPage() {
   }
 
   return (
-    ((auth.user.role === "dead_moroz") || (auth.user.role === "elf")) ?
+    !((auth.user.role === "dead_moroz") || (auth.user.role === "elf")) ?
+      <Navigate to={"/not-found-404"} />
+      :
       <Container >
         <Grid
           container
@@ -114,14 +113,16 @@ function SearchPage() {
               <SearchIcon />
             </IconButton>
           </Paper>
-
         </Grid>
-        {results && (results.gifts != undefined) && results.gifts.map((gift) => (
+        {searchResults && (searchResults != undefined) && searchResults.map((result, i) => (
           <Paper
-            key={gift._id}
+            key={i}
             sx={{
               m: 4,
-              p: 2,
+              pl: 3,
+              pr: 3,
+              pb: 1,
+              pt: 1,
               margin: 1,
               maxWidth: 'auto',
               flexGrow: 1
@@ -130,20 +131,33 @@ function SearchPage() {
             <Typography
               className="dead-moroz-red-color"
               variant="h6"
-              gutterBottom
             >
-              {capitalizeFirstLetter(gift._index)}
+              {capitalizeFirstLetter(result._index)}
             </Typography>
-            <Typography variant="body1" gutterBottom>
-              {getDate(gift._source.updated_at)} - {getHighlightedText(gift)}
+            <div>
+              <Link
+                href={`/${result._index}/${result._id}`}>
+                {`/${result._index}/${result._id}`}
+              </Link>
+            </div>
+            <Typography
+              className="dead-moroz-gray-color"
+              variant="body2"
+              gutterBottom
+              style={{ display: 'inline' }}
+            >
+              {getDate(result._source.updated_at)} {` - `}
             </Typography>
-            <Typography variant="body2" gutterBottom>
+            <Typography
+              variant="body1"
+              gutterBottom
+              style={{ display: 'inline' }}
+            >
+              {getHighlightedText(result)}
             </Typography>
           </Paper>
         ))}
       </Container>
-      :
-      <Navigate to={"/not-found-404"} />
   );
 }
 
