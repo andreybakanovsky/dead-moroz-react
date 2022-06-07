@@ -6,7 +6,9 @@ const endpoints = {
   login: (data) => axios.post("/v1/authentication/sign_in", data),
   getProfile: () => axios.get("/v1/profile"),
   updateProfile: (data) => axios.patch("/v1/authentication/account_update", data),
+  
   search: (string) => axios.get(`/v1/search?query=${string}`),
+  getReviewIds: (id) => axios.get(`/v1/review_ids?review_id=${id}`),
 
   getUsers: (params) => axios.get(`/v1/users?page_size=${params.page_size}&page=${params.page}`),
   getUser: (id) => axios.get(`/v1/users/${id.user_id}`),

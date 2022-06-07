@@ -15,6 +15,7 @@ import api from "../../services/api";
 import parse, { domToReact } from 'html-react-parser';
 import {
   Navigate,
+  useNavigate,
 } from 'react-router-dom';
 import Link from '@mui/material/Link';
 
@@ -23,6 +24,7 @@ function SearchPage() {
   const auth = useAuth();
   const [searchResults, setSearchResults] = useState();
   const [queryString, setQueryString] = useState();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (searchRef.current !== null) searchRef.current.focus();
@@ -76,6 +78,43 @@ function SearchPage() {
   const getDate = (date) => {
     const postDate = new Date(date);
     return postDate.toLocaleDateString('en-US',)
+  }
+
+  const preliminaryLink = (indexName, id) => {
+    let result = null;
+    switch (indexName) {
+      case "invitations": result = `/${indexName}/`;
+        break;
+      case "gifts": result = `/${indexName}/${id}`;
+        break;
+      case "reviews": result = `/${indexName}/${id}`;
+        break;
+      default: result = `/${indexName}/${id}`;
+    }
+    return result;
+  }
+
+  const goFinalLink = async (indexName, id) => {
+    let finalLink = null;
+    switch (indexName) {
+      case "invitations": finalLink = `/${indexName}/`;
+        break;
+      case "gifts": finalLink = `/${indexName}/${id}`;
+        break;
+      case "reviews": {
+        try {
+          const response = await api.auth.getReviewIds(id)
+          const ids = response.data;
+          finalLink = `/users/${ids.user_id}/goods/${ids.good_id}/reviews`;
+        } catch (e) {
+          console.log(e.response.status);
+          console.log(e.response.data);
+        }
+      }
+        break;
+      default: finalLink = `/${indexName}/${id}`;
+    }
+    navigate(finalLink);
   }
 
   return (
@@ -136,8 +175,12 @@ function SearchPage() {
             </Typography>
             <div>
               <Link
-                href={`/${result._index}/${result._id}`}>
-                {`/${result._index}/${result._id}`}
+                component="button"
+                onClick={() => {
+                  goFinalLink(result._index, result._id);
+                }}
+              >
+                {preliminaryLink(result._index, result._id)}
               </Link>
             </div>
             <Typography

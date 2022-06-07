@@ -55,8 +55,18 @@ function Reviews() {
   const [editReviewId, setEditReviewId] = useState(null);
   const commentInputRef = useRef(null);
   const location = useLocation();
-  const [user, setUser] = useState(location.state ? location.state.user : null);
-  const [good, setGood] = useState(location.state ? location.state.good : null);
+  const [user, setUser] = useState(location.state ? location.state.user : 
+    (async () => {
+      const response = await api.auth.getUser(id);
+      setUser(response.data);
+    })
+    );
+  const [good, setGood] = useState(location.state ? location.state.good : 
+    async () => {
+      const response = await api.auth.getGood(id);
+      setGood(response.data);
+    }
+    );
   const [goodTranslated, setGoodTranslated] = useState(null);
   const [giftsTranslated, setGiftsTranslated] = useState(null);
   const [requestedGifts, setRequestedGifts] = useState(null);
@@ -415,7 +425,9 @@ function Reviews() {
               </Grid>
               <Grid item>
                 <ButtonBase sx={{ width: 200, height: 128 }}>
-                  <Img alt="complex" src={good.images[0].url} />
+                  { (good.images !== undefined) &&
+                    <Img alt="complex" src={good.images[0].url} />
+                  }
                 </ButtonBase>
               </Grid>
             </Grid>
