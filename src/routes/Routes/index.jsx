@@ -34,6 +34,7 @@ import Review from "../../pages/Review";
 import SuggestedGifts from "../../pages/SuggestedGifts";
 import SuggestedGift from "../../pages/SuggestedGift";
 
+import SearchPage from "../../pages/SearchPage"
 import Statistics from "../../pages/Statistics";
 
 function AppRoutes() {
@@ -65,6 +66,10 @@ function AppRoutes() {
       <Route
         path="/invitations"
         element={<PrivateRoute> <Invitations /> </PrivateRoute>}
+      />
+      <Route
+        path="/search"
+        element={<PrivateRoute> <SearchPage /> </PrivateRoute>}
       />
 
       <Route path="users">
