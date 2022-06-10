@@ -101,26 +101,24 @@ const Header = () => {
                     >
                       Add good
                     </Button>}
+                  {((auth.user.role === 'dead_moroz') || (auth.user.role === 'elf')) &&
+                    <IconButton
+                      edge="start"
+                      color='inherit'
+                      component={Link} to="/search"
+                      sx={{ ml: 1 }}
+                    >
+                      <SearchIcon fontSize="large" />
+                    </IconButton>}
                   {(auth.user.role === 'dead_moroz') &&
-                    <>
-                      <IconButton
-                        edge="start"
-                        color='inherit'
-                        component={Link} to="/search"
-                        sx={{ ml: 1 }}
-                      >
-                        <SearchIcon fontSize="large" />
-                      </IconButton>
-                      <IconButton
-                        edge="start"
-                        color='inherit'
-                        component={Link} to="/invitations"
-                        sx={{ ml: 1 }}
-                      >
-                        <InsertInvitationIcon fontSize="large" />
-                      </IconButton>
-                    </>
-                  }
+                    <IconButton
+                      edge="start"
+                      color='inherit'
+                      component={Link} to="/invitations"
+                      sx={{ ml: 1 }}
+                    >
+                      <InsertInvitationIcon fontSize="large" />
+                    </IconButton>}
                   {(auth.user.role === 'elf' && karma) &&
                     <StyledBadge
                       badgeContent={(karma != null) ? karma.value : 0}
