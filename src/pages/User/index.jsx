@@ -1,22 +1,26 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   Container,
+  Avatar,
+  Paper,
+  Grid,
 } from "@mui/material";
-import api from "../../services/api";
 import {
   useParams,
   useNavigate
 } from 'react-router-dom';
 
+import api from "../../services/api";
+
 function User() {
-  const [data, setData] = useState();
+  const [user, setUser] = useState();
   let id = useParams();
   const navigate = useNavigate();
 
   const loadData = useCallback(async () => {
     try {
       const response = await api.auth.getUser(id);
-      setData(response.data);
+      setUser(response.data);
     } catch (e) {
       console.log(e.response.status);
       console.log(e.response.data);
@@ -32,11 +36,36 @@ function User() {
 
   return (
     <Container >
-      {data &&
-        <div>
-          <h2> {data.name} </h2>
-          <h3> Age: {data.age} </h3>
-        </div>}
+      <Grid
+        container
+        spacing={0}
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        style={{ minHeight: '50vh' }}
+      >
+        <Paper
+          sx={{
+            m: 4,
+            p: 2,
+            margin: 1,
+            maxWidth: "auto",
+            flexGrow: 1
+          }}
+        >
+          {user &&
+            <div>
+              <Avatar
+                alt={user.name}
+                src={user.avatar}
+                sx={{ width: 200, height: 200 }}
+                label="avatar"
+              />
+              <h2> {user.name} </h2>
+              <h3> Age: {user.age} </h3>
+            </div>}
+        </Paper>
+      </Grid>
     </Container>
   );
 }
