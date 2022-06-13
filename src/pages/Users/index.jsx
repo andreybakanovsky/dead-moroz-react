@@ -6,18 +6,21 @@ import {
   Typography,
   IconButton,
 } from "@mui/material";
-import api from "../../services/api";
 import Badge from '@mui/material/Badge';
 import Avatar from '@mui/material/Avatar';
 import { styled } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
 import GradingIcon from '@mui/icons-material/Grading';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+
 import Pagination from '@mui/material/Pagination';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Cookies from "js-cookie";
 
+import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -114,19 +117,37 @@ function Users() {
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                   variant="standard"
                 >
-                  <Avatar alt="Remy Sharp" src={user.avatar} />
+                  <Avatar alt="Avatar" src={user.avatar} />
                 </StyledBadge>
                 <Typography
                   variant="h6"
                   gutterBottom
                   sx={{ ml: 2, display: 'inline-block' }}
-                  component={Link} to={`/users/${user.id}/goods/`} state={user}
                   underline="none"
                 >
                   {user.name}
                 </Typography>
               </Grid>
               <Grid item xs={4}>
+                <IconButton aria-label="User-Profile"
+                  component={Link}
+                  to={(user.id === auth.user.id) ? `/profile` : `/users/${user.id}`}
+                  state={user}
+                >
+                  <AccountBoxIcon
+                    color='inherit'
+                    sx={{ fontSize: 26 }}
+                  />
+                </IconButton>
+                {(user.role === "kid") &&
+                  <IconButton aria-label="Goods"
+                    component={Link} to={`/users/${user.id}/goods/`} state={user}
+                  >
+                    <FactCheckIcon
+                      className="dead-moroz-red-color"
+                      sx={{ fontSize: 26 }}
+                    />
+                  </IconButton>}
                 {(auth.user.role === "dead_moroz") &&
                   <>
                     {(user.role === "kid") &&
